@@ -1,21 +1,15 @@
 package MooX::Role::Pluggable;
+our $VERSION = '0.01';
 
 use Moo::Role;
 
 use Carp;
 use strictures 1;
 
-
 use Scalar::Util 'blessed';
-
 use Try::Tiny;
 
-
-sub import {
-  ## FIXME install constants
-  ##  maybe we should just have a MooX::Role::Pluggable::Constants ?
-}
-
+use MooX::Role::Pluggable::Constants;
 
 use namespace::clean -except => 'meta';
 
@@ -48,7 +42,7 @@ has '__pluggable_pipeline' => (
 
 sub _pluggable_destroy {
   my ($self) = @_;
-  $self->plugin_del( $_ ) for $self->plugin_alias_list;
+  $self->plugin_del($_) for $self->plugin_alias_list;
 }
 
 sub _pluggable_event {
@@ -86,7 +80,10 @@ sub _pluggable_init {
 
 sub _pluggable_process {
   my ($self, $type, $event, $args) = @_;
-  ## Some of the tighter code; I'm open to optimization ideas.
+
+  ## This is essentially the same logic as Object::Pluggable,
+  ## except profiled and tightened up a bit.
+  ## I'm open to optimization ideas . . .
 
   unless (ref $args) {
     confess "Expected a type, event, and (possibly empty) args ARRAY"
@@ -734,7 +731,7 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
 
 =head1 SYNOPSIS
 
-  package MyPluggable;
+  package MyPluggableObject;
   use Moo;
 
   with 'MooX::Role::Pluggable';
