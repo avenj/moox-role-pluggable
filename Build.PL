@@ -31,6 +31,7 @@ my $build = Module::Build->new(
 
     'strictures'              => 1,
     'namespace::clean'        => '0.23',
+    'Moo'                     => 1,
     'Moo::Role'               => 0,
     'Try::Tiny'               => 0,
   },

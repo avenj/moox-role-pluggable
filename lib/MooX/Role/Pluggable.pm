@@ -92,7 +92,7 @@ sub _pluggable_process {
   }
 
   my $prefix = $self->__pluggable_opts->{ev_prefix};
-  substr($event, 0, $prefix, '')
+  substr($event, 0, length($prefix), '')
     if index($event, $prefix) == 0;
 
   my $meth = join '_', $self->__pluggable_opts->{types}->{$type}, $event;
@@ -767,7 +767,7 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
     ## Dispatch to 'P_' prefixed "PROCESS" type handlers:
     my $retval = $self->_pluggable_process( 'PROCESS',
       $event,
-      [ @args ]
+      \@args
     );
 
     unless ($retval == EAT_ALL) {
