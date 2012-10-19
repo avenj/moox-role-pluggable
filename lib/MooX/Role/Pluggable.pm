@@ -437,7 +437,7 @@ sub plugin_pipe_shift {
 
   return unless @{ $self->__pluggable_pipeline };
 
-  my $plug = shift @{ $self->__pluggable_pipeline };
+  my $plug  = shift @{ $self->__pluggable_pipeline };
   my $alias = $self->__plugin_by_ref($plug);
 
   $self->__plug_pipe_unregister($alias, $plug, @args);
@@ -731,24 +731,125 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
 
 =head1 SYNOPSIS
 
-  package MyPluggableObject;
+  ## A simple pluggable dispatcher.
+  package MyDispatcher;
   use Moo;
+
+  use MooX::Role::Pluggable::Constants;
 
   with 'MooX::Role::Pluggable';
 
-FIXME examples
+  sub BUILD {
+    my ($self) = @_;
+
+    ## (optionally) Configure our plugin pipeline
+    $self->_pluggable_init(
+      reg_prefix => 'Plug_',
+      ev_prefix  => 'Event_',
+      types      => [
+        NOTIFY  => 'N',
+        PROCESS => 'P',
+      ],
+    );
+  }
+
+  sub process {
+    my ($self, $event, @args) = @_;
+
+    ## Dispatch to 'P_' prefixed "PROCESS" type handlers:
+    my $retval = $self->_pluggable_process( 'PROCESS',
+      $event,
+      [ @args ]
+    );
+
+    unless ($retval == EAT_ALL) {
+      ## The pipeline allowed the event to continue.
+      ## A dispatcher might re-dispatch elsewhere, etc.
+    }
+  }
+
+  sub shutdown {
+    my ($self) = @_;
+    ## Unregister all of our plugins.
+    $self->_pluggable_destroy;
+  }
+
+
+  ## A Plugin object.
+  package MyPlugin;
+
+  use MooX::Role::Pluggable::Constants;
+
+  sub new { bless {}, shift }
+
+  sub Plug_register {
+    my ($self, $core) = @_;
+
+    ## Subscribe to events:
+    $core->subscribe( $self, 'PROCESS',
+      qw/
+        my_event
+      /,
+    );
+
+    ## Log that we're here, do some initialization, etc.
+
+    return EAT_NONE
+  }
+
+  sub Plug_unregister {
+    my ($self, $core) = @_;
+    ## Called at unregister-time.
+    return EAT_NONE
+  }
+
+  sub P_my_event {
+    ## Handle a dispatched "PROCESS"-type event
+
+    my ($self, $core) = splice @_, 0, 2;
+
+    ## Arguments are references and can be modified:
+    my $arg = ${ $_[0] };
+
+    . . .
+
+    ## Return an EAT constant to control event lifetime
+    ## EAT_NONE allows this event to continue through the pipeline
+    return EAT_NONE
+  }
+
+  ## A simple controller that interacts with our dispatcher.
+  package MyController;
+
+  use Moo;
+
+  has 'dispatcher' => (
+    is      => 'rw',
+    default => sub {  MyDispatcher->new()  },
+  );
+
+  sub BUILD {
+    my ($self) = @_;
+    $self->dispatcher->plugin_add( 'MyPlugin',
+      MyPlugin->new()
+    );
+  }
+
+  sub do_stuff {
+    my $self = shift;
+    $self->dispatcher->process( 'my_event', @_ )
+  }
 
 =head1 DESCRIPTION
 
 A L<Moo::Role> for turning instances of your class into pluggable objects.
 
-The logic and behavior is based almost entirely on L<Object::Pluggable>.
-Implementation & interface differ some; you will still want to read 
-thoroughly if coming from L<Object::Pluggable>.
+The logic and behavior is based almost entirely on L<Object::Pluggable>. 
+Many methods are the same; implementation & interface differ some, and you 
+will still want to read thoroughly if coming from L<Object::Pluggable>.
 
 Consumers of this role gain a plugin pipeline and methods to manipulate it,
 as well as a flexible dispatch system (see L</_pluggable_process>).
-
 
 
 =head2 Initialization
@@ -772,11 +873,11 @@ as well as a flexible dispatch system (see L</_pluggable_process>).
     types => [
       NOTIFY  => 'N',
       PROCESS => 'P',
-    ];
+    ],
   );
 
-A consumer should call _pluggable_init to set up C<__pluggable_opts> 
-appropriately prior to loading plugins.
+A consumer can call B<_pluggable_init> to set up pipeline-related options 
+appropriately; this should be done prior to loading plugins.
 
 =head3 _pluggable_destroy
 
