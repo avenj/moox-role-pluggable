@@ -202,7 +202,7 @@ sub __plugin_process_chk {
     return
   }
 
-  if (not defined $retval ||
+  if (! defined $retval ||
    (
         $retval != EAT_NONE
      && $retval != EAT_PLUGIN
@@ -309,6 +309,8 @@ sub plugin_replace {
       last
     }
   }
+
+  $old_plug
 }
 
 
@@ -851,14 +853,16 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
 =head1 DESCRIPTION
 
 A L<Moo::Role> for turning instances of your class into pluggable objects.
+Consumers of this role gain a plugin pipeline and methods to manipulate it,
+as well as a flexible dispatch system (see L</_pluggable_process>).
 
 The logic and behavior is based almost entirely on L<Object::Pluggable>. 
 Many methods are the same; implementation & interface differ some, and you 
 will still want to read thoroughly if coming from L<Object::Pluggable>.
 
-Consumers of this role gain a plugin pipeline and methods to manipulate it,
-as well as a flexible dispatch system (see L</_pluggable_process>).
-
+It may be worth noting that this is nothing at all like the Moose 
+counterpart L<MooseX::Role::Pluggable>. If the names confuse ... well, I 
+lacked for better ideas. ;-)
 
 =head2 Initialization
 
@@ -1077,6 +1081,8 @@ Returns a list of loaded plugin aliases.
   );
 
 Replace an existing plugin object with a new one.
+
+Returns the old (removed) plugin object.
 
 =head2 Pipeline methods
 
