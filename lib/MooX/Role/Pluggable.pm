@@ -28,9 +28,9 @@ has '__pluggable_opts' => (
 has '__pluggable_loaded' => (
   is      => 'ro',
   default => sub {
-    ALIAS  => {},  ## Objs keyed on aliases
-    OBJ    => {},  ## Aliases keyed on obj
-    HANDLE => {},  ## Type/event map hashes keyed on obj
+    ALIAS  => {},  ## Objs keyed by aliases
+    OBJ    => {},  ## Aliases keyed by obj
+    HANDLE => {},  ## Type/event map hashes keyed by obj
   },
 );
 
@@ -290,11 +290,11 @@ sub plugin_replace {
   my @unreg_args = ref $params{unregister_args} eq 'ARRAY' ?
     @{ $params{unregister_args} } : () ;
 
-  $self->_plug_pipe_unregister( $old_alias, $old_plug, @unreg_args );
+  $self->__plug_pipe_unregister( $old_alias, $old_plug, @unreg_args );
 
   my ($new_alias, $new_plug) = @params{'alias','plugin'};
 
-  return unless $self->_plug_pipe_register( $new_alias, $new_plug,
+  return unless $self->__plug_pipe_register( $new_alias, $new_plug,
     (
       ref $params{register_args} eq 'ARRAY' ?
         @{ $params{register_args} } : ()
@@ -397,7 +397,7 @@ sub plugin_pipe_push {
     return
   }
 
-  return unless $self->_plug_pipe_register($alias, $plug, @args);
+  return unless $self->__plug_pipe_register($alias, $plug, @args);
 
   push @{ $self->__pluggable_pipeline }, $plug;
 
@@ -412,7 +412,7 @@ sub plugin_pipe_pop {
   my $plug  = pop @{ $self->__pluggable_pipeline };
   my $alias = $self->__plugin_by_ref($plug);
 
-  $self->_plug_pipe_unregister($alias, $plug, @args);
+  $self->__plug_pipe_unregister($alias, $plug, @args);
 
   wantarray ? ($plug, $alias) : $plug
 }
@@ -425,7 +425,7 @@ sub plugin_pipe_unshift {
     return
   }
 
-  return unless $self->_plug_pipe_register($alias, $plug, @args);
+  return unless $self->__plug_pipe_register($alias, $plug, @args);
 
   unshift @{ $self->__pluggable_pipeline }, $plug;
 
@@ -440,7 +440,7 @@ sub plugin_pipe_shift {
   my $plug = shift @{ $self->__pluggable_pipeline };
   my $alias = $self->__plugin_by_ref($plug);
 
-  $self->_plug_pipe_unregister($alias, $plug, @args);
+  $self->__plug_pipe_unregister($alias, $plug, @args);
 
   wantarray ? ($plug, $alias) : $plug
 }
@@ -464,7 +464,7 @@ sub plugin_pipe_remove {
     ++$idx;
   }
 
-  $self->_plug_pipe_unregister( $old_alias, $old_plug, @unreg_args );
+  $self->__plug_pipe_unregister( $old_alias, $old_plug, @unreg_args );
 
   wantarray ? ($old_plug, $old_alias) : $old_plug
 }
@@ -516,7 +516,7 @@ sub plugin_pipe_insert_before {
     return
   }
 
-  return unless $self->_plug_pipe_register(
+  return unless $self->__plug_pipe_register(
     $params{alias}, $params{plugin},
     (
       ref $params{register_args} eq 'ARRAY' ?
@@ -558,7 +558,7 @@ sub plugin_pipe_insert_after {
     return
   }
 
-  return unless $self->_plug_pipe_register(
+  return unless $self->__plug_pipe_register(
     $params{alias}, $params{plugin},
     (
       ref $params{register_args} eq 'ARRAY' ?
@@ -614,7 +614,7 @@ sub plugin_pipe_bump_down {
   $pos
 }
 
-sub _plug_pipe_register {
+sub __plug_pipe_register {
   my ($self, $new_alias, $new_plug, @args) = @_;
 
   ## Register this as a known plugin.
@@ -651,7 +651,7 @@ sub _plug_pipe_register {
   $retval
 }
 
-sub _plug_pipe_unregister {
+sub __plug_pipe_unregister {
   my ($self, $old_alias, $old_plug, @args) = @_;
 
   my ($retval, $err);
@@ -740,7 +740,7 @@ FIXME examples
 
 =head1 DESCRIPTION
 
-A L<Moo::Role> for turning instances of your class into pluggable objects, 
+A L<Moo::Role> for turning instances of your class into pluggable objects.
 
 The logic and behavior is based almost entirely on L<Object::Pluggable>.
 Implementation & interface differ some; you will still want to read 
@@ -748,6 +748,8 @@ thoroughly if coming from L<Object::Pluggable>.
 
 Consumers of this role gain a plugin pipeline and methods to manipulate it,
 as well as a flexible dispatch system (see L</_pluggable_process>).
+
+
 
 =head2 Initialization
 
