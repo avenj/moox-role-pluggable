@@ -1,4 +1,5 @@
 Build.PL
+Changes
 lib/MooX/Role/Pluggable.pm
 lib/MooX/Role/Pluggable/Constants.pm
 Makefile.PL

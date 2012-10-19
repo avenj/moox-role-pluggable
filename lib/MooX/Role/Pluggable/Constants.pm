@@ -25,7 +25,7 @@ our @EXPORT = qw/
 
 =head1 NAME
 
-MooX::Role::Pluggable::Constants
+MooX::Role::Pluggable::Constants - MooX::Role::Pluggable EAT values
 
 =head1 SYNOPSIS
 
@@ -42,10 +42,11 @@ Exports constants used by L<MooX::Role::Pluggable/"_pluggable_process">:
   EAT_ALL    => 4
 
 These are used by plugins to control the lifetime of a plugin-processed 
-event. See L<MooX::Role::Pluggable> for details.
+event. See L<MooX::Role::Pluggable/"_pluggable_process"> for details.
 
 =head1 AUTHOR
 
-Jon Portnoy <avenj@cobaltirc.org>
+Jon Portnoy <avenj@cobaltirc.org>, borrowing from 
+L<Object::Pluggable::Constants>
 
 =cut

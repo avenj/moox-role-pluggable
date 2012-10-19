@@ -758,7 +758,7 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
   }
 
   around '_pluggable_event' => sub {
-    ## Override redirecting internal pluggable events to process()
+    ## Override redirecting internal events to process()
     my ($orig, $self) = splice @_, 0, 2;
     $self->process( @_ )
   };
