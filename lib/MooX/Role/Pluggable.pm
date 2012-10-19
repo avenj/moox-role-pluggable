@@ -11,6 +11,7 @@ use Try::Tiny;
 
 use MooX::Role::Pluggable::Constants;
 
+##
 use namespace::clean -except => 'meta';
 
 
@@ -64,7 +65,7 @@ sub _pluggable_init {
   if (defined $params{types}) {
     if (ref $params{types} eq 'ARRAY') {
       $self->__pluggable_opts->{types} = {
-        map {
+        map {;
           $_ => $_
         } @{ $params{types} }
       };
@@ -73,6 +74,7 @@ sub _pluggable_init {
     } else {
       confess "Expected types to be an ARRAY or HASH"
     }
+
   }
 
   $self
@@ -746,12 +748,18 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
     $self->_pluggable_init(
       reg_prefix => 'Plug_',
       ev_prefix  => 'Event_',
-      types      => [
+      types      => {
         NOTIFY  => 'N',
         PROCESS => 'P',
-      ],
+      },
     );
   }
+
+  around '_pluggable_event' => sub {
+    ## Override redirecting internal pluggable events to process()
+    my ($orig, $self) = splice @_, 0, 2;
+    $self->process( @_ )
+  };
 
   sub process {
     my ($self, $event, @args) = @_;
@@ -870,14 +878,17 @@ as well as a flexible dispatch system (see L</_pluggable_process>).
     ## Event types are arbitrary.
     ## Prefix is prepended when dispathing events of a particular type.
     ## Defaults to: { NOTIFY => 'N', PROCESS => 'P' }
-    types => [
+    types => {
       NOTIFY  => 'N',
       PROCESS => 'P',
-    ],
+    },
   );
 
 A consumer can call B<_pluggable_init> to set up pipeline-related options 
 appropriately; this should be done prior to loading plugins.
+
+B<< types => >> can be either an ARRAY of event types (which will be used 
+as prefixes) or a HASH mapping an event type to a prefix.
 
 =head3 _pluggable_destroy
 
@@ -888,8 +899,8 @@ Shuts down the plugin pipeline, unregistering all known plugins.
 =head3 _pluggable_event
 
   sub _pluggable_event {
-    my ($self, $event) = @_;
-    ## ... dispatch out with @_ perhaps
+    my ($self, $event, @args) = @_;
+    ## Dispatch out, perhaps.
   }
 
 C<_pluggable_event> is called for internal notifications.
@@ -911,10 +922,18 @@ Registers a plugin object to receive C<@events> of type C<$type>.
 
 This is frequently called from within the plugin's registration handler:
 
-  ## In MyPlugin
+  ## In a plugin:
   sub plugin_register {
-    my ($self, $manager) = @_;
-    $manager->subscribe( $self, 'NOTIFY', 'all' );
+    my ($self, $core) = @_;
+
+    $core->subscribe( $self, 'PROCESS',
+      qw/
+        my_event
+        another_event
+      /
+    );
+
+    $core->subscribe( $self, 'NOTIFY', 'all' );
   }
 
 Subscribe to 'all' to receive all events.
@@ -937,8 +956,8 @@ Normally one might call a L</subscribe> from here to start receiving
 events after load-time:
 
   sub plugin_register {
-    my ($self, $manager, @args) = @_;
-    $manager->subscribe( $self, 'NOTIFY', @events );
+    my ($self, $core, @args) = @_;
+    $core->subscribe( $self, 'NOTIFY', @events );
   }
 
 =head3 plugin_unregister
@@ -970,7 +989,7 @@ belonging to the plugin and the pluggable caller, respectively:
 
   ## In a plugin:
   sub N_foo {
-    my ($self, $manager) = splice @_, 0, 2;
+    my ($self, $core) = splice @_, 0, 2;
     ## Dereferenced expected scalars:
     my $baz = ${ $_[0] };
     my $bar = ${ $_[1] };
@@ -988,9 +1007,8 @@ Dispatch process for C<$event> 'foo' of C<$type> 'NOTIFY':
   - If the event was not eaten (see below), dispatch to plugins
 
 "Eaten" means a handler returned a EAT_* constant from 
-L<IRC::Server::Pluggable::Constants> indicating that the event's lifetime 
-should terminate. See L<IRC::Server::Pluggable::Role::Emitter> for more on 
-how EAT values interact with higher layers.
+L<MooX::Role::Pluggable::Constants> indicating that the event's lifetime 
+should terminate.
 
 Specifically:
 
@@ -1011,7 +1029,9 @@ B<If one of our plugins in the pipeline returns:>
     EAT_NONE:   continue to next plugin
 
 This functionality from L<Object::Pluggable> provides fine-grained control 
-over event lifetime.
+over event lifetime. Higher layers can check for an C<EAT_ALL> return value 
+to determine whether to continue operating on a particular event 
+(re-dispatch elsewhere, for example).
 
 =head2 Public Methods
 
