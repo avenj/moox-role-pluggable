@@ -1,4 +1,12 @@
 # Changes for MooX::Role::Pluggable
 
+ * 0.02  20 Oct 2012
+
+   perl-5.10.1 should do, drop 5.12.1 dep
+
+   Improved POD
+
+
  * 0.01  19 Oct 2012
+
    Initial release

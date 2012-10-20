@@ -1,5 +1,5 @@
 package MooX::Role::Pluggable;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Moo::Role;
 
@@ -857,7 +857,8 @@ Consumers of this role gain a plugin pipeline and methods to manipulate it,
 as well as a flexible dispatch system (see L</_pluggable_process>).
 
 The logic and behavior is based almost entirely on L<Object::Pluggable>. 
-Many methods are the same; implementation & interface differ some, and you 
+Many methods are the same; implementation & interface differ some 
+(dispatch is slightly faster, also) and you 
 will still want to read thoroughly if coming from L<Object::Pluggable>.
 
 It may be worth noting that this is nothing at all like the Moose 
@@ -1028,14 +1029,22 @@ B<If one of our plugins in the pipeline returns:>
 
     EAT_ALL:    skip further plugins, return EAT_ALL
     EAT_CLIENT: continue to next plugin, set pending EAT_ALL
+                (EAT_ALL will be returned when plugin processing finishes)
     EAT_PLUGIN: return EAT_ALL if previous sub returned EAT_CLIENT
                 else return EAT_NONE
     EAT_NONE:   continue to next plugin
 
 This functionality from L<Object::Pluggable> provides fine-grained control 
-over event lifetime. Higher layers can check for an C<EAT_ALL> return value 
-to determine whether to continue operating on a particular event 
-(re-dispatch elsewhere, for example).
+over event lifetime.
+
+Higher layers can check for an C<EAT_ALL> return value from 
+_pluggable_process to determine whether to continue operating on a 
+particular event 
+(re-dispatch elsewhere, for example). Plugins can use 'EAT_CLIENT' to 
+indicate that an event should return EAT_ALL after plugin processing 
+finishes, 'EAT_PLUGIN' to stop plugin processing immediately, and 'EAT_ALL' 
+to stop plugin processing and indicate event lifetime termination 
+immediately.
 
 =head2 Public Methods
 
