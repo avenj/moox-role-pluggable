@@ -123,8 +123,9 @@ DESCRIPTION
     it, as well as a flexible dispatch system (see "_pluggable_process").
 
     The logic and behavior is based almost entirely on Object::Pluggable.
-    Many methods are the same; implementation & interface differ some, and
-    you will still want to read thoroughly if coming from Object::Pluggable.
+    Many methods are the same; implementation & interface differ some
+    (dispatch is slightly faster, also) and you will still want to read
+    thoroughly if coming from Object::Pluggable.
 
     It may be worth noting that this is nothing at all like the Moose
     counterpart MooseX::Role::Pluggable. If the names confuse ... well, I
@@ -283,14 +284,21 @@ DESCRIPTION
 
         EAT_ALL:    skip further plugins, return EAT_ALL
         EAT_CLIENT: continue to next plugin, set pending EAT_ALL
+                    (EAT_ALL will be returned when plugin processing finishes)
         EAT_PLUGIN: return EAT_ALL if previous sub returned EAT_CLIENT
                     else return EAT_NONE
         EAT_NONE:   continue to next plugin
 
     This functionality from Object::Pluggable provides fine-grained control
-    over event lifetime. Higher layers can check for an "EAT_ALL" return
-    value to determine whether to continue operating on a particular event
-    (re-dispatch elsewhere, for example).
+    over event lifetime.
+
+    Higher layers can check for an "EAT_ALL" return value from
+    _pluggable_process to determine whether to continue operating on a
+    particular event (re-dispatch elsewhere, for example). Plugins can use
+    'EAT_CLIENT' to indicate that an event should return EAT_ALL after
+    plugin processing finishes, 'EAT_PLUGIN' to stop plugin processing
+    immediately, and 'EAT_ALL' to stop plugin processing and indicate event
+    lifetime termination immediately.
 
   Public Methods
    plugin_add

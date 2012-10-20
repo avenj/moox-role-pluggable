@@ -16,7 +16,7 @@ name: MooX-Role-Pluggable
 provides:
   MooX::Role::Pluggable:
     file: lib/MooX/Role/Pluggable.pm
-    version: 0.01
+    version: 0.02
   MooX::Role::Pluggable::Constants:
     file: lib/MooX/Role/Pluggable/Constants.pm
     version: 0
@@ -28,8 +28,8 @@ requires:
   Scalar::Util: 0
   Try::Tiny: 0
   namespace::clean: 0.23
-  perl: v5.12.1
+  perl: v5.10.1
   strictures: 1
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.01
+version: 0.02
