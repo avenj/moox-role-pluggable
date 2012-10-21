@@ -1,5 +1,5 @@
 package MooX::Role::Pluggable;
-our $VERSION = '0.02';
+our $VERSION = '0.02_01';
 
 use Moo::Role;
 
@@ -247,7 +247,7 @@ sub plugin_del {
   confess "Expected a plugin alias"
     unless defined $alias_or_plug;
 
-  scalar( $self->plugin_pipe_remove($alias_or_plug, @args) )
+  scalar( $self->__plugin_pipe_remove($alias_or_plug, @args) )
 }
 
 sub plugin_get {
@@ -286,6 +286,7 @@ sub plugin_replace {
 
   unless (defined $old_plug) {
     $@ = "No such plugin: $old_alias";
+    carp $@;
     return
   }
 
@@ -398,6 +399,7 @@ sub plugin_pipe_push {
 
   if (my $existing = $self->__plugin_by_alias($alias) ) {
     $@ = "Already have plugin $alias : $existing";
+    carp $@;
     return
   }
 
@@ -425,7 +427,7 @@ sub plugin_pipe_unshift {
   my ($self, $alias, $plug, @args) = @_;
 
   if (my $existing = $self->__plugin_by_alias($alias) ) {
-    $@ = "Already have plugin $alias : $existing";
+    carp "Already have plugin $alias : $existing";
     return
   }
 
@@ -449,13 +451,14 @@ sub plugin_pipe_shift {
   wantarray ? ($plug, $alias) : $plug
 }
 
-sub plugin_pipe_remove {
+sub __plugin_pipe_remove {
   my ($self, $old, @unreg_args) = @_;
 
   my ($old_alias, $old_plug) = $self->__plugin_get_plug_any($old);
 
   unless (defined $old_plug) {
     $@ = "No such plugin: $old_alias";
+    carp $@;
     return
   }
 
@@ -480,6 +483,7 @@ sub plugin_pipe_get_index {
 
   unless (defined $item_plug) {
     $@ = "No such plugin: $item_alias";
+    carp $@;
     return -1
   }
 
@@ -512,11 +516,13 @@ sub plugin_pipe_insert_before {
 
   unless (defined $prev_plug) {
     $@ = "No such plugin: $prev_alias";
+    carp $@;
     return
   }
 
   if ( my $existing = $self->__plugin_by_alias($params{alias}) ) {
     $@ = "Already have plugin $params{alias} : $existing";
+    carp $@;
     return
   }
 
@@ -554,11 +560,13 @@ sub plugin_pipe_insert_after {
 
   unless (defined $next_plug) {
     $@ = "No such plugin: $next_alias";
+    carp $@;
     return
   }
 
   if ( my $existing = $self->__plugin_by_alias($params{alias}) ) {
     $@ = "Already have plugin $params{alias} : $existing";
+    carp $@;
     return
   }
 
@@ -857,13 +865,15 @@ Consumers of this role gain a plugin pipeline and methods to manipulate it,
 as well as a flexible dispatch system (see L</_pluggable_process>).
 
 The logic and behavior is based almost entirely on L<Object::Pluggable>. 
-Many methods are the same; implementation & interface differ some 
+Some methods are the same; implementation & interface differ some 
 (dispatch is slightly faster, also) and you 
 will still want to read thoroughly if coming from L<Object::Pluggable>.
 
 It may be worth noting that this is nothing at all like the Moose 
 counterpart L<MooseX::Role::Pluggable>. If the names confuse ... well, I 
 lacked for better ideas. ;-)
+
+If you're using L<POE>, also see L<MooX::Role::POE::Emitter>.
 
 =head2 Initialization
 
@@ -890,10 +900,25 @@ lacked for better ideas. ;-)
   );
 
 A consumer can call B<_pluggable_init> to set up pipeline-related options 
-appropriately; this should be done prior to loading plugins.
+appropriately; this should be done prior to loading plugins or dispatching 
+to L</_pluggable_process>. If it is never called, the defaults 
+(as shown above) are used.
 
 B<< types => >> can be either an ARRAY of event types (which will be used 
-as prefixes) or a HASH mapping an event type to a prefix.
+as prefixes):
+
+  types => [ qw/ IncomingEvent OutgoingEvent / ],
+
+... or a HASH mapping an event type to a prefix:
+
+  types => {
+    Incoming => 'I',
+    Outgoing => 'O',
+  },
+
+A '_' is automatically appended to event type prefixes when events are 
+dispatched via L</_pluggable>, but not to C<reg_prefix>/C<event_prefix>. An 
+empty string C<reg_prefix>/C<event_prefix> is valid.
 
 =head3 _pluggable_destroy
 
@@ -1020,9 +1045,10 @@ Specifically:
 B<If our consuming class provides a method or '_default' that returns:>
 
     EAT_ALL:    skip plugin pipeline, return EAT_ALL
-    EAT_PLUGIN: skip plugin pipeline, return EAT_NONE
     EAT_CLIENT: continue to plugin pipeline
                 return EAT_ALL if plugin returns EAT_PLUGIN later
+    EAT_PLUGIN: skip plugin pipeline entirely
+                return EAT_NONE unless EAT_CLIENT was seen previously
     EAT_NONE:   continue to plugin pipeline
 
 B<If one of our plugins in the pipeline returns:>
@@ -1034,25 +1060,29 @@ B<If one of our plugins in the pipeline returns:>
                 else return EAT_NONE
     EAT_NONE:   continue to next plugin
 
-This functionality from L<Object::Pluggable> provides fine-grained control 
-over event lifetime.
+This functionality (derived from L<Object::Pluggable>) provides 
+fine-grained control over event lifetime.
 
 Higher layers can check for an C<EAT_ALL> return value from 
 _pluggable_process to determine whether to continue operating on a 
 particular event 
 (re-dispatch elsewhere, for example). Plugins can use 'EAT_CLIENT' to 
-indicate that an event should return EAT_ALL after plugin processing 
-finishes, 'EAT_PLUGIN' to stop plugin processing immediately, and 'EAT_ALL' 
-to stop plugin processing and indicate event lifetime termination 
-immediately.
+indicate that an event should be eaten after plugin processing 
+is complete, 'EAT_PLUGIN' to stop plugin processing, and 'EAT_ALL' 
+to indicate that the event should not be dispatched further.
 
 =head2 Public Methods
+
+Plugin pipeline manipulation methods will set C<$@>, C<carp()>, and return 
+empty list on error (unless otherwise noted). See L</plugin_error> 
+regarding errors raised during plugin registration and dispatch.
 
 =head3 plugin_add
 
   $self->plugin_add( $alias, $plugin_obj, @args );
 
-Add a plugin object to the pipeline.
+Add a plugin object to the pipeline. Returns the same values as 
+L</plugin_pipe_push>.
 
 =head3 plugin_del
 
@@ -1060,7 +1090,7 @@ Add a plugin object to the pipeline.
 
 Remove a plugin from the pipeline.
 
-Takes either a plugin alias or object.
+Takes either a plugin alias or object. Returns the removed plugin object.
 
 =head3 plugin_get
 
@@ -1099,9 +1129,8 @@ Returns the old (removed) plugin object.
 
   $self->plugin_pipe_push( $alias, $plugin_obj, @args );
 
-Add a plugin to the end of the pipeline.
-
-(Use L</plugin_add> to load plugins.)
+Add a plugin to the end of the pipeline. (Typically one would use 
+L</plugin_add> rather than calling this method directly.)
 
 =head3 plugin_pipe_pop
 
@@ -1110,11 +1139,17 @@ Add a plugin to the end of the pipeline.
 Pop the last plugin off the pipeline, passing any specified arguments to 
 L</plugin_unregister>.
 
+In scalar context, returns the plugin object that was removed.
+
+In list context, returns the plugin object and alias, respectively.
+
 =head3 plugin_pipe_unshift
 
   $self->plugin_pipe_unshift( $alias, $plugin_obj, @args );
 
 Add a plugin to the beginning of the pipeline.
+
+Returns the total number of loaded plugins (or an empty list on failure).
 
 =head3 plugin_pipe_shift
 
@@ -1123,6 +1158,10 @@ Add a plugin to the beginning of the pipeline.
 Shift the first plugin off the pipeline, passing any specified args to 
 L</plugin_unregister>.
 
+In scalar context, returns the plugin object that was removed.
+
+In list context, returns the plugin object and alias, respectively.
+
 =head3 plugin_pipe_get_index
 
   my $idx = $self->plugin_pipe_get_index( $alias_or_plugin_obj );
@@ -1130,8 +1169,9 @@ L</plugin_unregister>.
     ## Plugin doesn't exist
   }
 
-Returns the position of the specified plugin in the pipeline, or -1 if it 
-cannot be located.
+Returns the position of the specified plugin in the pipeline.
+
+Returns -1 if the plugin does not exist.
 
 =head3 plugin_pipe_insert_after
 
@@ -1144,7 +1184,7 @@ cannot be located.
   );
 
 Add a plugin to the pipeline after the specified previously-existing alias 
-or plugin object.
+or plugin object. Returns boolean true on success.
 
 =head3 plugin_pipe_insert_before
 
@@ -1165,11 +1205,15 @@ previously-existing plugin, not after.
 
 Move the specified plugin 'up' C<$count> positions in the pipeline.
 
+Returns -1 if the plugin cannot be bumped up any farther.
+
 =head3 plugin_pipe_bump_down
 
   $self->plugin_pipe_bump_down( $alias_or_plugin_obj, $count );
 
 Move the specified plugin 'down' C<$count> positions in the pipeline.
+
+Returns -1 if the plugin cannot be bumped down any farther.
 
 =head2 Internal events
 
@@ -1197,6 +1241,6 @@ Arguments are the old plugin alias and object, respectively.
 
 Jon Portnoy <avenj@cobaltirc.org>
 
-Based on L<Object::Pluggable> by BINGOS, HINRIK et al.
+Based on L<Object::Pluggable> by BINGOS, HINRIK, APOCAL, japhy et al.
 
 =cut
