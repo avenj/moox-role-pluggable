@@ -1,5 +1,13 @@
 # Changes for MooX::Role::Pluggable
 
+ * 0.03  21 Oct 2012
+
+   When pipeline manipulation methods fail, carp() in addition to setting 
+   $@ and returning empty list (or similar).
+
+   Improved POD
+
+
  * 0.02  20 Oct 2012
 
    perl-5.10.1 should do, drop 5.12.1 dep

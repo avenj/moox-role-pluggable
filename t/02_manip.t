@@ -1,4 +1,4 @@
-use Test::More tests => 45;
+use Test::More tests => 46;
 use strict; use warnings;
 
 {
@@ -25,6 +25,7 @@ use strict; use warnings;
   sub do_test_events {
     my ($self) = @_;
     $self->process( 'test', 0 );
+    $self->process( 'eatable' );
     $self->process( 'not_handled' );
   }
 
@@ -52,6 +53,10 @@ use strict; use warnings;
   sub P_plugin_removed {
     pass("got plugin_removed");
     EAT_ALL
+  }
+
+  sub P_eatable {
+    EAT_NONE
   }
 
   sub _default {
@@ -84,6 +89,11 @@ use strict; use warnings;
     pass( "Plugin::A unregistered" );
   }
 
+  sub P_eatable {
+    pass("Plugin::A got P_eatable");
+    EAT_PLUGIN
+  }
+
   sub P_test {
     my ($self, $core) = splice @_, 0, 2;
     pass( "Plugin::A got P_test" );
@@ -114,12 +124,16 @@ use strict; use warnings;
   sub plugin_register {
     my ($self, $core) = splice @_, 0, 2;
     pass( __PACKAGE__ . ' plug registered' );
-    $core->subscribe( $self, 'PROCESS', 'test' );
+    $core->subscribe( $self, 'PROCESS', 'test', 'eatable' );
     EAT_NONE
   }
 
   sub plugin_unregister {
     pass( "Plugin::B unregistered" );
+  }
+
+  sub P_eatable {
+    fail("Plugin::B should not have received P_eatable")
   }
 
   sub P_test {

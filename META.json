@@ -41,7 +41,7 @@
    "provides" : {
       "MooX::Role::Pluggable" : {
          "file" : "lib/MooX/Role/Pluggable.pm",
-         "version" : "0.02"
+         "version" : "0.03"
       },
       "MooX::Role::Pluggable::Constants" : {
          "file" : "lib/MooX/Role/Pluggable/Constants.pm",
@@ -54,5 +54,5 @@
          "http://dev.perl.org/licenses/"
       ]
    },
-   "version" : "0.02"
+   "version" : "0.03"
 }

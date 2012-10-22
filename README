@@ -123,13 +123,15 @@ DESCRIPTION
     it, as well as a flexible dispatch system (see "_pluggable_process").
 
     The logic and behavior is based almost entirely on Object::Pluggable.
-    Many methods are the same; implementation & interface differ some
+    Some methods are the same; implementation & interface differ some
     (dispatch is slightly faster, also) and you will still want to read
     thoroughly if coming from Object::Pluggable.
 
     It may be worth noting that this is nothing at all like the Moose
     counterpart MooseX::Role::Pluggable. If the names confuse ... well, I
     lacked for better ideas. ;-)
+
+    If you're using POE, also see MooX::Role::POE::Emitter.
 
   Initialization
    _pluggable_init
@@ -154,10 +156,25 @@ DESCRIPTION
       );
 
     A consumer can call _pluggable_init to set up pipeline-related options
-    appropriately; this should be done prior to loading plugins.
+    appropriately; this should be done prior to loading plugins or
+    dispatching to "_pluggable_process". If it is never called, the defaults
+    (as shown above) are used.
 
     types => can be either an ARRAY of event types (which will be used as
-    prefixes) or a HASH mapping an event type to a prefix.
+    prefixes):
+
+      types => [ qw/ IncomingEvent OutgoingEvent / ],
+
+    ... or a HASH mapping an event type to a prefix:
+
+      types => {
+        Incoming => 'I',
+        Outgoing => 'O',
+      },
+
+    A '_' is automatically appended to event type prefixes when events are
+    dispatched via "_pluggable", but not to "reg_prefix"/"event_prefix". An
+    empty string "reg_prefix"/"event_prefix" is valid.
 
    _pluggable_destroy
       $self->_pluggable_destroy;
@@ -275,9 +292,10 @@ DESCRIPTION
     If our consuming class provides a method or '_default' that returns:
 
         EAT_ALL:    skip plugin pipeline, return EAT_ALL
-        EAT_PLUGIN: skip plugin pipeline, return EAT_NONE
         EAT_CLIENT: continue to plugin pipeline
                     return EAT_ALL if plugin returns EAT_PLUGIN later
+        EAT_PLUGIN: skip plugin pipeline entirely
+                    return EAT_NONE unless EAT_CLIENT was seen previously
         EAT_NONE:   continue to plugin pipeline
 
     If one of our plugins in the pipeline returns:
@@ -289,29 +307,34 @@ DESCRIPTION
                     else return EAT_NONE
         EAT_NONE:   continue to next plugin
 
-    This functionality from Object::Pluggable provides fine-grained control
-    over event lifetime.
+    This functionality (derived from Object::Pluggable) provides
+    fine-grained control over event lifetime.
 
     Higher layers can check for an "EAT_ALL" return value from
     _pluggable_process to determine whether to continue operating on a
     particular event (re-dispatch elsewhere, for example). Plugins can use
-    'EAT_CLIENT' to indicate that an event should return EAT_ALL after
-    plugin processing finishes, 'EAT_PLUGIN' to stop plugin processing
-    immediately, and 'EAT_ALL' to stop plugin processing and indicate event
-    lifetime termination immediately.
+    'EAT_CLIENT' to indicate that an event should be eaten after plugin
+    processing is complete, 'EAT_PLUGIN' to stop plugin processing, and
+    'EAT_ALL' to indicate that the event should not be dispatched further.
 
   Public Methods
+    Plugin pipeline manipulation methods will set $@, "carp()", and return
+    empty list on error (unless otherwise noted). See "plugin_error"
+    regarding errors raised during plugin registration and dispatch.
+
    plugin_add
       $self->plugin_add( $alias, $plugin_obj, @args );
 
-    Add a plugin object to the pipeline.
+    Add a plugin object to the pipeline. Returns the same values as
+    "plugin_pipe_push".
 
    plugin_del
       $self->plugin_del( $alias_or_plugin_obj, @args );
 
     Remove a plugin from the pipeline.
 
-    Takes either a plugin alias or object.
+    Takes either a plugin alias or object. Returns the removed plugin
+    object.
 
    plugin_get
       my $plug_obj = $self->plugin_get( $alias );
@@ -345,9 +368,8 @@ DESCRIPTION
    plugin_pipe_push
       $self->plugin_pipe_push( $alias, $plugin_obj, @args );
 
-    Add a plugin to the end of the pipeline.
-
-    (Use "plugin_add" to load plugins.)
+    Add a plugin to the end of the pipeline. (Typically one would use
+    "plugin_add" rather than calling this method directly.)
 
    plugin_pipe_pop
       my $plug = $self->plugin_pipe_pop( @unregister_args );
@@ -355,10 +377,17 @@ DESCRIPTION
     Pop the last plugin off the pipeline, passing any specified arguments to
     "plugin_unregister".
 
+    In scalar context, returns the plugin object that was removed.
+
+    In list context, returns the plugin object and alias, respectively.
+
    plugin_pipe_unshift
       $self->plugin_pipe_unshift( $alias, $plugin_obj, @args );
 
     Add a plugin to the beginning of the pipeline.
+
+    Returns the total number of loaded plugins (or an empty list on
+    failure).
 
    plugin_pipe_shift
       $self->plugin_pipe_shift( @unregister_args );
@@ -366,14 +395,19 @@ DESCRIPTION
     Shift the first plugin off the pipeline, passing any specified args to
     "plugin_unregister".
 
+    In scalar context, returns the plugin object that was removed.
+
+    In list context, returns the plugin object and alias, respectively.
+
    plugin_pipe_get_index
       my $idx = $self->plugin_pipe_get_index( $alias_or_plugin_obj );
       if ($idx < 0) {
         ## Plugin doesn't exist
       }
 
-    Returns the position of the specified plugin in the pipeline, or -1 if
-    it cannot be located.
+    Returns the position of the specified plugin in the pipeline.
+
+    Returns -1 if the plugin does not exist.
 
    plugin_pipe_insert_after
       $self->plugin_pipe_insert_after(
@@ -385,7 +419,7 @@ DESCRIPTION
       );
 
     Add a plugin to the pipeline after the specified previously-existing
-    alias or plugin object.
+    alias or plugin object. Returns boolean true on success.
 
    plugin_pipe_insert_before
       $self->plugin_pipe_insert_before(
@@ -404,10 +438,14 @@ DESCRIPTION
 
     Move the specified plugin 'up' $count positions in the pipeline.
 
+    Returns -1 if the plugin cannot be bumped up any farther.
+
    plugin_pipe_bump_down
       $self->plugin_pipe_bump_down( $alias_or_plugin_obj, $count );
 
     Move the specified plugin 'down' $count positions in the pipeline.
+
+    Returns -1 if the plugin cannot be bumped down any farther.
 
   Internal events
    plugin_error
@@ -430,5 +468,5 @@ DESCRIPTION
 AUTHOR
     Jon Portnoy <avenj@cobaltirc.org>
 
-    Based on Object::Pluggable by BINGOS, HINRIK et al.
+    Based on Object::Pluggable by BINGOS, HINRIK, APOCAL, japhy et al.
 

@@ -1,5 +1,5 @@
 package MooX::Role::Pluggable;
-our $VERSION = '0.02_01';
+our $VERSION = '0.03';
 
 use Moo::Role;
 
