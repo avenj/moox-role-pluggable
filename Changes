@@ -1,5 +1,10 @@
 # Changes for MooX::Role::Pluggable
 
+ * 0.04  25 Oct 2012
+
+   Improved POD / tests
+
+
  * 0.03  21 Oct 2012
 
    When pipeline manipulation methods fail, carp() in addition to setting 
