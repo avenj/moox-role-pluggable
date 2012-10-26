@@ -19,7 +19,7 @@ my $build = Module::Build->new(
 
   build_requires => {
     'Test::More'      => 0,
-#    'Test::Exception' => 0,
+    'Test::Exception' => 0,
   },
 
   requires => {

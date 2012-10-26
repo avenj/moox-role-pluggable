@@ -1,4 +1,4 @@
-use Test::More tests => 46;
+use Test::More tests => 48;
 use strict; use warnings;
 
 {
@@ -6,6 +6,7 @@ use strict; use warnings;
     MyDispatcher;
   use strict; use warnings;
   use Test::More;
+  use Test::Exception;
 
   use Moo;
   with 'MooX::Role::Pluggable';
@@ -24,6 +25,10 @@ use strict; use warnings;
 
   sub do_test_events {
     my ($self) = @_;
+
+    dies_ok(sub { $self->_pluggable_init( types => '' ) });
+    dies_ok(sub { $self->_pluggable_process('type', 'event') });
+
     $self->process( 'test', 0 );
     $self->process( 'eatable' );
     $self->process( 'not_handled' );
