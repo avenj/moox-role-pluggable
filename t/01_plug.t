@@ -1,4 +1,4 @@
-use Test::More tests => 9;
+use Test::More tests => 12;
 use strict; use warnings FATAL => 'all';
 
 {
@@ -21,7 +21,7 @@ use strict; use warnings FATAL => 'all';
 
   sub do_test_events {
     my ($self) = @_;
-    $self->process( 'test' );
+    $self->process( 'test', 'first', 'second' );
   }
 
   around '_pluggable_event' => sub {
@@ -31,6 +31,10 @@ use strict; use warnings FATAL => 'all';
 
   sub P_test {
     pass( __PACKAGE__ . ' P_test' );
+    my ($self, $core) = splice @_, 0, 2;
+    my ($first, $second) = @_;
+    cmp_ok( $$first, 'eq', 'first',   'arg 1 looks OK' );
+    cmp_ok( $$second, 'eq', 'second', 'arg 2 looks OK' );
     EAT_NONE
   }
 }
@@ -58,7 +62,9 @@ use strict; use warnings FATAL => 'all';
 
   sub P_test {
     my ($self, $core) = splice @_, 0, 2;
-    pass( "Plugin got P_test" );
+    my ($first, $second) = @_;
+    cmp_ok( $$first, 'eq', 'first',   'arg 1 looks OK' );
+    cmp_ok( $$second, 'eq', 'second', 'arg 2 looks OK' );
     EAT_NONE
   }
 
