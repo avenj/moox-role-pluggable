@@ -83,10 +83,10 @@ sub _pluggable_init {
 sub _pluggable_process {
   my ($self, $type, $event, $args) = @_;
 
-  ## This is essentially the same logic as Object::Pluggable,
-  ## except profiled and tightened up a bit.
+  ## This is essentially the same logic as Object::Pluggable.
+  ## Profiled and tightened up a bit, but the accessors are a bit
+  ## of a hit.
   ## I'm open to optimization ideas . . .
-
   unless (ref $args) {
     confess "Expected a type, event, and (possibly empty) args ARRAY"
   }
@@ -151,10 +151,10 @@ sub _pluggable_process {
 
     if      ( $thisplug->can($meth) ) {
       eval { $plug_ret = $thisplug->$meth($self, \(@$args), \@extra) };
-      $self->__plugin_process_chk($self, $meth, $plug_ret, $this_alias);
+      $self->__plugin_process_chk($thisplug, $meth, $plug_ret, $this_alias);
     } elsif ( $thisplug->can('_default') ) {
       eval { $plug_ret = $thisplug->$meth($self, \(@$args), \@extra) };
-      $self->__plugin_process_chk($self, '_default', $plug_ret, $this_alias);
+      $self->__plugin_process_chk($thisplug, '_default', $plug_ret, $this_alias);
     }
 
     if      (! defined $plug_ret) {
@@ -865,8 +865,7 @@ Consumers of this role gain a plugin pipeline and methods to manipulate it,
 as well as a flexible dispatch system (see L</_pluggable_process>).
 
 The logic and behavior is based almost entirely on L<Object::Pluggable>. 
-Some methods are the same; implementation & interface differ some 
-(dispatch is slightly faster, also) and you 
+Some methods are the same; implementation & interface differ some and you 
 will still want to read thoroughly if coming from L<Object::Pluggable>.
 
 It may be worth noting that this is nothing at all like the Moose 
