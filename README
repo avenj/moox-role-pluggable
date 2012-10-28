@@ -123,9 +123,8 @@ DESCRIPTION
     it, as well as a flexible dispatch system (see "_pluggable_process").
 
     The logic and behavior is based almost entirely on Object::Pluggable.
-    Some methods are the same; implementation & interface differ some
-    (dispatch is slightly faster, also) and you will still want to read
-    thoroughly if coming from Object::Pluggable.
+    Some methods are the same; implementation & interface differ some and
+    you will still want to read thoroughly if coming from Object::Pluggable.
 
     It may be worth noting that this is nothing at all like the Moose
     counterpart MooseX::Role::Pluggable. If the names confuse ... well, I

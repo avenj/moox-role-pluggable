@@ -1,5 +1,10 @@
 # Changes for MooX::Role::Pluggable
 
+ * 0.05  28 Oct 2012
+
+   Fix plugin_error plugin object dispatch.
+
+
  * 0.04  25 Oct 2012
 
    Improved POD / tests

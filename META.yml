@@ -3,6 +3,7 @@ abstract: 'Add a plugin pipeline to your cows'
 author:
   - 'Jon Portnoy <avenj@cobaltirc.org>'
 build_requires:
+  Test::Exception: 0
   Test::More: 0
 configure_requires:
   Module::Build: 0.40
@@ -16,7 +17,7 @@ name: MooX-Role-Pluggable
 provides:
   MooX::Role::Pluggable:
     file: lib/MooX/Role/Pluggable.pm
-    version: 0.04
+    version: 0.05
   MooX::Role::Pluggable::Constants:
     file: lib/MooX/Role/Pluggable/Constants.pm
     version: 0
@@ -32,4 +33,5 @@ requires:
   strictures: 1
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.04
+  repository: http://github.com/avenj/moox-role-pluggable.git
+version: 0.05
