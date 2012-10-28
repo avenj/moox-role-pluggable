@@ -97,7 +97,8 @@ sub _pluggable_process {
 
   my $meth = $self->__pluggable_opts->{types}->{$type} .'_'. $event;
 
-  my $retval = my $self_ret = EAT_NONE;
+  my $retval = EAT_NONE;
+  my $self_ret;
 
   my @extra;
 
@@ -113,7 +114,7 @@ sub _pluggable_process {
     $self->__plugin_process_chk($self, '_default', $self_ret);
   }
 
-  if      (! defined $self_ret ) {
+  if      (! defined $self_ret) {
     ## No-op.
   } elsif ( $self_ret == EAT_PLUGIN ) {
      ## Don't plugin-process, just return EAT_NONE.
