@@ -1,4 +1,4 @@
-use Test::More tests => 6;
+use Test::More tests => 9;
 use strict; use warnings FATAL => 'all';
 
 {
@@ -61,6 +61,18 @@ use strict; use warnings FATAL => 'all';
     pass( "Plugin got P_test" );
     EAT_NONE
   }
+
+  sub other_register {
+    my ($self, $core) = splice @_, 0, 2;
+    pass( "Got other_register" );
+    $core->subscribe( $self, 'PROCESS', 'all' );
+    EAT_NONE
+  }
+  sub other_unregister { EAT_NONE }
+
+  sub Process_test {
+    pass( "Got Process_test" );
+  }
 }
 
 my $disp = MyDispatcher->new;
@@ -72,3 +84,10 @@ ok( $disp->plugin_add( 'MyPlug', MyPlugin->new ), 'plugin_add()' );
 $disp->do_test_events;
 
 $disp->shutdown;
+
+ok( $disp->_pluggable_init(
+  types => { PROCESS => "Process" },
+  reg_prefix => 'other_',
+), '_pluggable_init()' );
+$disp->plugin_add( 'MyPlugB', MyPlugin->new );
+$disp->process('test');

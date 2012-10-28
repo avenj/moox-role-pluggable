@@ -1,6 +1,7 @@
 package MooX::Role::Pluggable;
-our $VERSION = '0.07_01';
+our $VERSION = '0.08';
 
+use 5.10.1;
 use Moo::Role;
 
 use Carp;
@@ -69,7 +70,7 @@ sub _pluggable_init {
   if (defined $params{types}) {
 
     if (ref $params{types} eq 'ARRAY') {
-      $self->__pluggable_opts->{types} = {
+      $self->__pluggable_opts->{types} = +{
         map {;
           $_ => $_
         } @{ $params{types} }
