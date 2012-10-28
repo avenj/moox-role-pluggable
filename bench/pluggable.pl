@@ -87,11 +87,9 @@ $mx_disp->plugin_add( 'B'.$_ => Plug::MX::P->new )
 
 cmpthese( $count, +{
   'object-pluggable' => sub {
-    use strict; use warnings FATAL => 'all';
     $op_disp->process( 'test', 'things' );
   },
   'moox-role-pluggable' => sub {
-    use strict; use warnings FATAL => 'all';
     $mx_disp->process( 'test', 'things' );
   },
 } );

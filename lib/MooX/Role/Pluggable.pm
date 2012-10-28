@@ -143,7 +143,6 @@ sub _pluggable_process {
 
     if ( 
          $self == $thisplug
-      || !exists $handle_ref->{$thisplug}->{$type}
       || (
              !exists $handle_ref->{$thisplug}->{$type}->{$event}
           && !exists $handle_ref->{$thisplug}->{$type}->{all}
@@ -153,7 +152,7 @@ sub _pluggable_process {
     }
 
     undef $plug_ret;
-    my $this_alias = ($self->__plugin_get_plug_any($thisplug))[0];
+    my $this_alias = $self->__plugin_by_ref($thisplug);
 
     if      ( my $sub = $thisplug->can($meth) ) {
       eval {; $plug_ret = $thisplug->$sub($self, \(@$args), \@extra) };
