@@ -85,7 +85,7 @@ $op_disp->plugin_add( 'A'.$_ => Plug::O::P->new )
 $mx_disp->plugin_add( 'B'.$_ => Plug::MX::P->new )
       for 1 .. 20;
 
-timethese( $count, +{
+cmpthese( $count, +{
   'object-pluggable' => sub {
     use strict; use warnings FATAL => 'all';
     $op_disp->process( 'test', 'things' );

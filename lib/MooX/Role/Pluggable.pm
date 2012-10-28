@@ -88,14 +88,14 @@ sub _pluggable_process {
   ## of a hit.
   ## I'm open to optimization ideas . . .
   unless (ref $args) {
-    confess "Expected a type, event, and (possibly empty) args ARRAY"
+    confess 'Expected a type, event, and (possibly empty) args ARRAY'
   }
 
   my $prefix = $self->__pluggable_opts->{ev_prefix};
   substr($event, 0, length($prefix), '')
     if index($event, $prefix) == 0;
 
-  my $meth = join '_', $self->__pluggable_opts->{types}->{$type}, $event;
+  my $meth = $self->__pluggable_opts->{types}->{$type} .'_'. $event;
 
   my $retval = my $self_ret = EAT_NONE;
 
@@ -184,12 +184,14 @@ sub _pluggable_process {
 }
 
 sub __plugin_process_chk {
-  my ($self, $obj, $meth, $retval, $src) = @_;
-  $src = defined $src ? "plugin '$src'" : "self" ;
+#  my ($self, $obj, $meth, $retval, $src) = @_;
+  my $retval = $_[3];
 
   if ($@) {
     chomp $@;
-    my $err = "$meth call on $src failed: $@";
+    my ($self, $obj, $meth, undef, $src) = @_;
+    my $e_src = defined $src ? "plugin '$src'" : 'self' ;
+    my $err = "$meth call on $e_src failed: $@";
 
     warn "$err\n";
 
@@ -203,14 +205,14 @@ sub __plugin_process_chk {
   }
 
   if (! defined $retval ||
-   (
-        $retval != EAT_NONE
-     && $retval != EAT_PLUGIN
-     && $retval != EAT_CLIENT
-     && $retval != EAT_ALL
-   ) ) {
-
-    my $err = "$meth call on $src did not return a valid EAT_ constant";
+    (
+        $retval != EAT_NONE   && $retval != EAT_PLUGIN
+     && $retval != EAT_CLIENT && $retval != EAT_ALL
+    ) 
+  ) {
+    my ($self, $obj, $meth, undef, $src) = @_;
+    my $e_src = defined $src ? "plugin '$src'" : 'self' ;
+    my $err = "$meth call on $e_src did not return a valid EAT_ constant";
 
     warn "$err\n";
 
@@ -219,8 +221,6 @@ sub __plugin_process_chk {
       $err,
       ( $obj == $self ? ($obj, $src) : () ),
     );
-
-    return
   }
 }
 
@@ -864,7 +864,7 @@ as well as a flexible dispatch system (see L</_pluggable_process>).
 
 The logic and behavior is based almost entirely on L<Object::Pluggable>. 
 Some methods are the same; implementation & interface differ some and you 
-will still want to read thoroughly if coming from L<Object::Pluggable>.
+will still want to read thoroughly if coming from L<Object::Pluggable>. 
 
 It may be worth noting that this is nothing at all like the Moose 
 counterpart L<MooseX::Role::Pluggable>. If the names confuse ... well, I 
@@ -1233,6 +1233,26 @@ Arguments are the new plugin alias and object, respectively.
 Issued via L</_pluggable_event> when a plugin is unregistered.
 
 Arguments are the old plugin alias and object, respectively.
+
+=head2 Performance
+
+Dispatcher performance has been profiled and optimized, but I'm most 
+certainly open to ideas ;-)
+
+A pair of L<Benchmark> runs on similar systems. 30000 calls with 20 loaded 
+plugins dispatching to one handler that does nothing except return 
+EAT_NONE:
+
+                        Rate    object-pluggable moox-role-pluggable
+  object-pluggable    6122/s                  --                -10%
+  moox-role-pluggable 6787/s                 11%
+
+                        Rate    object-pluggable moox-role-pluggable
+  object-pluggable    6186/s                  --                -11%
+  moox-role-pluggable 6912/s                 12%
+
+(Benchmark script is available in the C<bench/> directory of the upstream 
+repository; see L<https://github.com/avenj/moox-role-pluggable>)
 
 =head1 AUTHOR
 
