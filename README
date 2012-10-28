@@ -125,6 +125,7 @@ DESCRIPTION
     The logic and behavior is based almost entirely on Object::Pluggable.
     Some methods are the same; implementation & interface differ some and
     you will still want to read thoroughly if coming from Object::Pluggable.
+    Dispatch is a bit faster -- see "Performance".
 
     It may be worth noting that this is nothing at all like the Moose
     counterpart MooseX::Role::Pluggable. If the names confuse ... well, I
@@ -172,8 +173,9 @@ DESCRIPTION
       },
 
     A '_' is automatically appended to event type prefixes when events are
-    dispatched via "_pluggable", but not to "reg_prefix"/"event_prefix". An
-    empty string "reg_prefix"/"event_prefix" is valid.
+    dispatched via "_pluggable_process", but not to
+    "reg_prefix"/"event_prefix". An empty string "reg_prefix"/"event_prefix"
+    is valid.
 
    _pluggable_destroy
       $self->_pluggable_destroy;
@@ -463,6 +465,29 @@ DESCRIPTION
     Issued via "_pluggable_event" when a plugin is unregistered.
 
     Arguments are the old plugin alias and object, respectively.
+
+  Performance
+    Dispatcher performance has been profiled and optimized, but I'm most
+    certainly open to ideas ;-)
+
+    Some Benchmark runs. 30000 "_pluggable_process" calls with 20 loaded
+    plugins dispatching one argument to one handler that does nothing except
+    return EAT_NONE:
+
+                            Rate
+      object-pluggable    6122/s
+      moox-role-pluggable 6787/s
+
+                            Rate
+      object-pluggable    6186/s
+      moox-role-pluggable 6912/s
+
+                            Rate
+      object-pluggable    6186/s
+      moox-role-pluggable 7143/s
+
+    (Benchmark script is available in the "bench/" directory of the upstream
+    repository; see <https://github.com/avenj/moox-role-pluggable>)
 
 AUTHOR
     Jon Portnoy <avenj@cobaltirc.org>

@@ -1,5 +1,5 @@
 package MooX::Role::Pluggable;
-our $VERSION = '0.07';
+our $VERSION = '0.07_01';
 
 use Moo::Role;
 
@@ -18,7 +18,7 @@ use namespace::clean -except => 'meta';
 has '__pluggable_opts' => (
   is  => 'ro',
   default => sub {
-    {
+   +{
       reg_prefix => 'plugin_',
       ev_prefix  => 'plugin_ev_',
       types      => { PROCESS => 'P',  NOTIFY => 'N' },
@@ -28,10 +28,12 @@ has '__pluggable_opts' => (
 
 has '__pluggable_loaded' => (
   is      => 'ro',
-  default => sub {
-    ALIAS  => {},  ## Objs keyed by aliases
-    OBJ    => {},  ## Aliases keyed by obj
-    HANDLE => {},  ## Type/event map hashes keyed by obj
+  default => sub { 
+   +{
+      ALIAS  => {},  ## Objs keyed by aliases
+      OBJ    => {},  ## Aliases keyed by obj
+      HANDLE => {},  ## Type/event map hashes keyed by obj
+    },
   },
 );
 
@@ -56,13 +58,16 @@ sub _pluggable_init {
   my ($self, %params) = @_;
   $params{lc $_} = delete $params{$_} for keys %params;
 
-  $self->__pluggable_opts->{reg_prefix} = $params{reg_prefix}
-    if defined $params{reg_prefix};
+  my $reg_prefix = $params{register_prefix} // $params{reg_prefix};
+  $self->__pluggable_opts->{reg_prefix} = $reg_prefix
+    if defined $reg_prefix;
 
-  $self->__pluggable_opts->{ev_prefix} = $params{event_prefix}
-    if defined $params{event_prefix};
+  my $ev_prefix = $params{event_prefix} // $params{ev_prefix};
+  $self->__pluggable_opts->{ev_prefix} = $ev_prefix
+    if defined $ev_prefix;
 
   if (defined $params{types}) {
+
     if (ref $params{types} eq 'ARRAY') {
       $self->__pluggable_opts->{types} = {
         map {;
