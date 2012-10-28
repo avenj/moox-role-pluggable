@@ -90,8 +90,23 @@ sub _pluggable_process {
   my ($self, $type, $event, $args) = @_;
 
   ## This is essentially the same logic as Object::Pluggable.
-  ## Profiled and tightened up a bit . . .
-  ## I'm open to optimization ideas . . .
+  ## Profiled and tightened up a bit:
+  ##
+  ##   - Error handling is much faster as a normal sub
+  ##     Still need $self to dispatch _pluggable_event, but skipping method
+  ##     resolution and passing $self on the stack added a few hundred 
+  ##     extra calls/sec.
+  ##
+  ##     Additionally our error handler does significantly less argument
+  ##     unpacking, only unpacking if there is actually an error to handle.
+  ##
+  ##   - We do not invoke the regex engine at all, saving a fair bit of 
+  ##     time; checking index() and applying substr() as needed to strip
+  ##     event prefixes is significantly quicker.
+  ##
+  ##   - Conditionals have been optimized a bit.
+  ##
+  ## I'm open to other ideas . . .
   unless (ref $args) {
     confess 'Expected a type, event, and (possibly empty) args ARRAY'
   }
@@ -733,7 +748,7 @@ sub __plugin_by_ref {
 sub __plugin_get_plug_any {
   my ($self, $item) = @_;
 
-  ref $item ?
+  blessed $item ?
     ( $self->__pluggable_loaded->{OBJ}->{$item}, $item )
     : ( $item, $self->__pluggable_loaded->{ALIAS}->{$item} );
 }
