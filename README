@@ -472,19 +472,15 @@ DESCRIPTION
 
     Some Benchmark runs. 30000 "_pluggable_process" calls with 20 loaded
     plugins dispatching one argument to one handler that does nothing except
-    return EAT_NONE:
+    return EAT_NONE: Rate object-pluggable 6148/s moox-role-pluggable 8065/s
 
-                            Rate
-      object-pluggable    6122/s
-      moox-role-pluggable 6787/s
+                           Rate
+            object-pluggable     6098/s
+            moox-role-pluggable  8108/s
 
-                            Rate
-      object-pluggable    6186/s
-      moox-role-pluggable 6912/s
-
-                            Rate
-      object-pluggable    6186/s
-      moox-role-pluggable 7143/s
+                           Rate
+            object-pluggable     6122/s
+            moox-role-pluggable  8174/s
 
     (Benchmark script is available in the "bench/" directory of the upstream
     repository; see <https://github.com/avenj/moox-role-pluggable>)

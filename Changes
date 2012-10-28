@@ -1,5 +1,14 @@
 # Changes for MooX::Role::Pluggable
 
+ * 0.09  28 Oct 2012
+
+   Fix args dispatched via plugin_error.
+   Include the object/src unconditionally.
+
+   More dispatcher optimizations:
+     object-pluggable    6061/s
+     moox-role-pluggable 8174/s
+
  * 0.08  28 Oct 2012
 
    Fix _pluggable_init ev_prefix vs event_prefix

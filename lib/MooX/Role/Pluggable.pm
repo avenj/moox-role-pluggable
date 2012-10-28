@@ -1,5 +1,5 @@
 package MooX::Role::Pluggable;
-our $VERSION = '0.08_01';
+our $VERSION = '0.09_01';
 
 use 5.10.1;
 use Moo::Role;
@@ -1252,18 +1252,17 @@ certainly open to ideas ;-)
 Some L<Benchmark> runs. 30000 L</_pluggable_process> calls with 20 loaded 
 plugins dispatching one argument to one handler that does nothing except 
 return EAT_NONE:
+                       Rate
+	object-pluggable     6148/s
+	moox-role-pluggable  8065/s
 
-                        Rate
-  object-pluggable    6122/s
-  moox-role-pluggable 6787/s
+                       Rate
+	object-pluggable     6098/s
+	moox-role-pluggable  8108/s
 
-                        Rate
-  object-pluggable    6186/s
-  moox-role-pluggable 6912/s
-
-                        Rate
-  object-pluggable    6186/s
-  moox-role-pluggable 7143/s
+                       Rate
+	object-pluggable     6122/s
+	moox-role-pluggable  8174/s
 
 (Benchmark script is available in the C<bench/> directory of the upstream 
 repository; see L<https://github.com/avenj/moox-role-pluggable>)
