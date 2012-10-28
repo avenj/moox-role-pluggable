@@ -133,6 +133,7 @@ sub _pluggable_process {
 
   my $handle_ref = $self->__pluggable_loaded->{HANDLE};
 
+  my $plug_ret;
   PLUG: for my $thisplug (@{ $self->__pluggable_pipeline }) {
 
     if ( 
@@ -146,7 +147,7 @@ sub _pluggable_process {
       next PLUG
     }
 
-    my $plug_ret   = EAT_NONE;
+    undef $plug_ret;
     my $this_alias = ($self->__plugin_get_plug_any($thisplug))[0];
 
     if      ( $thisplug->can($meth) ) {
@@ -221,6 +222,8 @@ sub __plugin_process_chk {
       $err,
       ( $obj == $self ? ($obj, $src) : () ),
     );
+
+    return
   }
 }
 
