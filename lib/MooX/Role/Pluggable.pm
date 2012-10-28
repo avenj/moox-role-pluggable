@@ -725,11 +725,9 @@ sub __plugin_by_ref {
 sub __plugin_get_plug_any {
   my ($self, $item) = @_;
 
-  my ($item_alias, $item_plug) = ref $item ?
+  ref $item ?
     ( $self->__pluggable_loaded->{OBJ}->{$item}, $item )
     : ( $item, $self->__pluggable_loaded->{ALIAS}->{$item} );
-
-  wantarray ? ($item_alias, $item_plug) : $item_plug
 }
 
 

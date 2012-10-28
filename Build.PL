@@ -23,8 +23,7 @@ my $build = Module::Build->new(
   },
 
   requires => {
-    'perl'     => '5.10.1',
-
+    'perl'          => '5.10.1',
     'Carp'          => 0,
     'Exporter'      => 0,
     'Scalar::Util'  => 0,
@@ -35,6 +34,10 @@ my $build = Module::Build->new(
     'Moo::Role'               => 0,
     'Try::Tiny'               => 0,
   },
+
+  recommends => {
+    'Class::XSAccessor'       => '1.07',
+  }
 
   meta_merge => {
     resources => {
