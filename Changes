@@ -1,5 +1,10 @@
 # Changes for MooX::Role::Pluggable
 
+ * 0.06  28 Oct 2012
+
+   Optimize dispatcher.
+
+
  * 0.05  28 Oct 2012
 
    Fix plugin_error plugin object dispatch.

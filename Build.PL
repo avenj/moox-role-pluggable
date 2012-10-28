@@ -37,7 +37,7 @@ my $build = Module::Build->new(
 
   recommends => {
     'Class::XSAccessor'       => '1.07',
-  }
+  },
 
   meta_merge => {
     resources => {
