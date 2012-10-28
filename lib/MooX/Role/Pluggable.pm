@@ -106,15 +106,15 @@ sub _pluggable_process {
 
   local $@;
 
-  if      ( $self->can($meth) ) {
+  if      ( my $sub = $self->can($meth) ) {
     ## Dispatch to ourself
-    eval { $self_ret = $self->$meth($self, \(@$args), \@extra) };
+    eval { $self_ret = $self->$sub($self, \(@$args), \@extra) };
     ## Skipping method resolution got me over 7100 calls/sec on my system.
     ## I'm not sorry:
     __plugin_process_chk($self, $self, $meth, $self_ret);
-  } elsif ( $self->can('_default') ) {
+  } elsif ( $sub = $self->can('_default') ) {
     ## Dispatch to _default
-    eval { $self_ret = $self->_default($self, $meth, \(@$args), \@extra) };
+    eval { $self_ret = $self->$sub($self, $meth, \(@$args), \@extra) };
     __plugin_process_chk($self, $self, '_default', $self_ret);
   }
 
@@ -155,11 +155,11 @@ sub _pluggable_process {
     undef $plug_ret;
     my $this_alias = ($self->__plugin_get_plug_any($thisplug))[0];
 
-    if      ( $thisplug->can($meth) ) {
-      eval { $plug_ret = $thisplug->$meth($self, \(@$args), \@extra) };
+    if      ( my $sub = $thisplug->can($meth) ) {
+      eval { $plug_ret = $thisplug->$sub($self, \(@$args), \@extra) };
       __plugin_process_chk($self, $thisplug, $meth, $plug_ret, $this_alias);
-    } elsif ( $thisplug->can('_default') ) {
-      eval { $plug_ret = $thisplug->$meth($self, \(@$args), \@extra) };
+    } elsif ( $sub = $thisplug->can('_default') ) {
+      eval { $plug_ret = $thisplug->$sub($self, \(@$args), \@extra) };
       __plugin_process_chk($self, $thisplug, '_default', $plug_ret, $this_alias);
     }
 
