@@ -74,10 +74,6 @@ my $count = 30_000;
     my ($self, $event, @args) = @_;
     $self->_pluggable_process( 'NOTIFY', $event, \@args )
   }
-  sub shutdown {
-    my ($self) = @_;
-    $self->_pluggable_destroy;
-  }
 }
 
 use Benchmark ':all';
