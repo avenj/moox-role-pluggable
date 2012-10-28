@@ -1,5 +1,13 @@
 # Changes for MooX::Role::Pluggable
 
+ * 0.07  28 Oct 2012
+
+   Further dispatcher optimizations:
+                           Rate
+     object-pluggable    6098/s
+     moox-role-pluggable 7009/s
+
+
  * 0.06  28 Oct 2012
 
    Optimize dispatcher.
