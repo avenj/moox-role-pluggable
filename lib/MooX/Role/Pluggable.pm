@@ -22,7 +22,7 @@ has '__pluggable_opts' => (
    +{
       reg_prefix => 'plugin_',
       ev_prefix  => 'plugin_ev_',
-      types      => { PROCESS => 'P',  NOTIFY => 'N' },
+      types      => +{ PROCESS => 'P',  NOTIFY => 'N' },
     },
   },
 );
@@ -108,13 +108,13 @@ sub _pluggable_process {
 
   if      ( my $sub = $self->can($meth) ) {
     ## Dispatch to ourself
-    eval { $self_ret = $self->$sub($self, \(@$args), \@extra) };
+    eval {; $self_ret = $self->$sub($self, \(@$args), \@extra) };
     ## Skipping method resolution got me over 7100 calls/sec on my system.
     ## I'm not sorry:
     __plugin_process_chk($self, $self, $meth, $self_ret);
   } elsif ( $sub = $self->can('_default') ) {
     ## Dispatch to _default
-    eval { $self_ret = $self->$sub($self, $meth, \(@$args), \@extra) };
+    eval {; $self_ret = $self->$sub($self, $meth, \(@$args), \@extra) };
     __plugin_process_chk($self, $self, '_default', $self_ret);
   }
 
@@ -156,10 +156,10 @@ sub _pluggable_process {
     my $this_alias = ($self->__plugin_get_plug_any($thisplug))[0];
 
     if      ( my $sub = $thisplug->can($meth) ) {
-      eval { $plug_ret = $thisplug->$sub($self, \(@$args), \@extra) };
+      eval {; $plug_ret = $thisplug->$sub($self, \(@$args), \@extra) };
       __plugin_process_chk($self, $thisplug, $meth, $plug_ret, $this_alias);
     } elsif ( $sub = $thisplug->can('_default') ) {
-      eval { $plug_ret = $thisplug->$sub($self, \(@$args), \@extra) };
+      eval {; $plug_ret = $thisplug->$sub($self, \(@$args), \@extra) };
       __plugin_process_chk($self, $thisplug, '_default', $plug_ret, $this_alias);
     }
 
@@ -190,10 +190,12 @@ sub _pluggable_process {
 }
 
 sub __plugin_process_chk {
-#  my ($self, $obj, $meth, $retval, $src) = @_;
+  ## Ugly as sin, but fast if there are no errors, which matters here.
+
   if ($@) {
     chomp $@;
     my ($self, $obj, $meth, undef, $src) = @_;
+
     my $e_src = defined $src ? "plugin '$src'" : 'self' ;
     my $err = "$meth call on $e_src failed: $@";
 
@@ -209,15 +211,12 @@ sub __plugin_process_chk {
     return
   }
 
-  my $retval = $_[3];
+  if (! defined $_[3] ||
+      ( $_[3] != EAT_NONE   && $_[3] != EAT_ALL &&
+        $_[3] != EAT_CLIENT && $_[3] != EAT_PLUGIN ) ) {
 
-  if (! defined $retval ||
-    (
-        $retval != EAT_NONE   && $retval != EAT_PLUGIN
-     && $retval != EAT_CLIENT && $retval != EAT_ALL
-    ) 
-  ) {
     my ($self, $obj, $meth, undef, $src) = @_;
+
     my $e_src = defined $src ? "plugin '$src'" : 'self' ;
     my $err = "$meth call on $e_src did not return a valid EAT_ constant";
 
