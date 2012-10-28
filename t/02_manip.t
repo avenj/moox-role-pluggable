@@ -1,13 +1,11 @@
 use Test::More tests => 48;
-use strict; use warnings;
+use strict; use warnings FATAL => 'all';
 
 {
   package
     MyDispatcher;
-  use strict; use warnings;
   use Test::More;
   use Test::Exception;
-
   use Moo;
   with 'MooX::Role::Pluggable';
 
@@ -76,7 +74,7 @@ use strict; use warnings;
 {
   package
     MyPlugin::A;
-  use strict; use warnings;
+  use strict; use warnings FATAL => 'all';
   use Test::More;
 
   use MooX::Role::Pluggable::Constants;
@@ -119,7 +117,7 @@ use strict; use warnings;
 {
   package
     MyPlugin::B;
-  use strict; use warnings;
+  use strict; use warnings FATAL => 'all';
   use Test::More;
 
   use MooX::Role::Pluggable::Constants;

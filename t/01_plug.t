@@ -1,16 +1,13 @@
 use Test::More tests => 6;
-use strict; use warnings;
+use strict; use warnings FATAL => 'all';
 
 {
   package
     MyDispatcher;
-  use strict; use warnings;
   use Test::More;
-
   use Moo;
-  with 'MooX::Role::Pluggable';
-
   use MooX::Role::Pluggable::Constants;
+  with 'MooX::Role::Pluggable';
 
   sub process {
     my ($self, $event, @args) = @_;
@@ -41,7 +38,7 @@ use strict; use warnings;
 {
   package
     MyPlugin;
-  use strict; use warnings;
+  use strict; use warnings FATAL => 'all';
   use Test::More;
 
   use MooX::Role::Pluggable::Constants;

@@ -35,6 +35,13 @@ my $build = Module::Build->new(
     'Moo::Role'               => 0,
     'Try::Tiny'               => 0,
   },
+
+  meta_merge => {
+    resources => {
+      repository => 'git://eris.cobaltirc.org/moox-role-pluggable.git',
+    },
+  },
+
 );
 
 $build->create_build_script;
