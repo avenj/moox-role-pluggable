@@ -90,8 +90,7 @@ sub _pluggable_process {
   my ($self, $type, $event, $args) = @_;
 
   ## This is essentially the same logic as Object::Pluggable.
-  ## Profiled and tightened up a bit, but the accessors are a bit
-  ## of a hit.
+  ## Profiled and tightened up a bit . . .
   ## I'm open to optimization ideas . . .
   unless (ref $args) {
     confess 'Expected a type, event, and (possibly empty) args ARRAY'
@@ -110,7 +109,7 @@ sub _pluggable_process {
   if      ( $self->can($meth) ) {
     ## Dispatch to ourself
     eval { $self_ret = $self->$meth($self, \(@$args), \@extra) };
-    ## Skipping MRO got me over 7100 calls/sec on my system.
+    ## Skipping method resolution got me over 7100 calls/sec on my system.
     ## I'm not sorry:
     __plugin_process_chk($self, $self, $meth, $self_ret);
   } elsif ( $self->can('_default') ) {
@@ -203,7 +202,8 @@ sub __plugin_process_chk {
     $self->_pluggable_event(
       $self->__pluggable_opts->{ev_prefix} . "plugin_error",
       $err,
-      ( $obj == $self ? ($obj, $src) : () ),
+      $obj,
+      $e_src
     );
 
     return
@@ -226,7 +226,8 @@ sub __plugin_process_chk {
     $self->_pluggable_event(
       $self->__pluggable_opts->{ev_prefix} . "plugin_error",
       $err,
-      ( $obj == $self ? ($obj, $src) : () ),
+      $obj,
+      $e_src
     );
 
     return
