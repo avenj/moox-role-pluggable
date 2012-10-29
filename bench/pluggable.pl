@@ -85,7 +85,7 @@ $op_disp->plugin_add( 'A'.$_ => Plug::O::P->new )
 $mx_disp->plugin_add( 'B'.$_ => Plug::MX::P->new )
       for 1 .. 20;
 
-cmpthese( $count, +{
+my %stuff = ( $count, +{
   'object-pluggable' => sub {
     $op_disp->process( 'test', 'things' );
   },
@@ -93,3 +93,6 @@ cmpthese( $count, +{
     $mx_disp->process( 'test', 'things' );
   },
 } );
+
+timethese(%stuff);
+cmpthese(%stuff);

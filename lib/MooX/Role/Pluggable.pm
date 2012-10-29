@@ -167,7 +167,9 @@ sub _pluggable_process {
     }
 
     undef $plug_ret;
-    my $this_alias = $self->__plugin_by_ref($thisplug);
+    ## Using by_ref is nicer, but the method call is too much overhead.
+    ## Gained ~2000 calls/sec by skipping it:
+    my $this_alias = $self->__pluggable_loaded->{OBJ}->{$thisplug};
 
     if      ( my $sub = $thisplug->can($meth) ) {
       eval {; $plug_ret = $thisplug->$sub($self, \(@$args), \@extra) };
@@ -1267,17 +1269,18 @@ certainly open to ideas ;-)
 Some L<Benchmark> runs. 30000 L</_pluggable_process> calls with 20 loaded 
 plugins dispatching one argument to one handler that does nothing except 
 return EAT_NONE:
-                       Rate
-	object-pluggable     6148/s
-	moox-role-pluggable  8065/s
 
-                       Rate
-	object-pluggable     6098/s
-	moox-role-pluggable  8108/s
+                      Rate    object-pluggable moox-role-pluggable
+  object-pluggable    6173/s                  --                -38%
+  moox-role-pluggable 9967/s                 61%
 
-                       Rate
-	object-pluggable     6122/s
-	moox-role-pluggable  8174/s
+                       Rate    object-pluggable moox-role-pluggable
+  object-pluggable     6224/s                  --                -38%
+  moox-role-pluggable 10000/s                 61%                  --
+
+                      Rate    object-pluggable moox-role-pluggable
+  object-pluggable    6383/s                  --                -35%
+  moox-role-pluggable 9868/s                 55%
 
 (Benchmark script is available in the C<bench/> directory of the upstream 
 repository; see L<https://github.com/avenj/moox-role-pluggable>)
