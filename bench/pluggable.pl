@@ -85,6 +85,11 @@ $op_disp->plugin_add( 'A'.$_ => Plug::O::P->new )
 $mx_disp->plugin_add( 'B'.$_ => Plug::MX::P->new )
       for 1 .. 20;
 
+use feature 'say';
+say "Object::Pluggable ".$Object::Pluggable::VERSION;
+say "MooX::Role::Pluggable ".$MooX::Role::Pluggable::VERSION;
+
+
 my %stuff = ( $count, +{
   'object-pluggable' => sub {
     $op_disp->process( 'test', 'things' );
@@ -94,5 +99,5 @@ my %stuff = ( $count, +{
   },
 } );
 
-timethese(%stuff);
+#timethese(%stuff);
 cmpthese(%stuff);

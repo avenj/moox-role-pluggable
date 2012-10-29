@@ -948,16 +948,18 @@ An empty string C<reg_prefix>/C<event_prefix> is valid.
 
   $self->_pluggable_destroy;
 
-Shuts down the plugin pipeline, unregistering all known plugins.
+Shuts down the plugin pipeline, unregistering/unloading all known plugins.
 
 =head3 _pluggable_event
 
+  ## In our consumer
   sub _pluggable_event {
     my ($self, $event, @args) = @_;
     ## Dispatch out, perhaps.
   }
 
-C<_pluggable_event> is called for internal notifications.
+C<_pluggable_event> is called for internal notifications, such as plugin 
+load/unload and error reporting (see L</Internal events>).
 
 It should be overriden in your consuming class to do something useful with 
 the dispatched event (and any other arguments passed in).
@@ -968,13 +970,22 @@ Also see L</Internal events>
 
 =head2 Registration
 
+A plugin is any blessed object that is registered with your Pluggable 
+object via L</plugin_add> and usually subscribed to some events via 
+L</subscribe>.
+
+See L</plugin_add> regarding loading plugins.
+
 =head3 subscribe
+
+B<Subscribe a plugin to some pluggable events.>
 
   $self->subscribe( $plugin_obj, $type, @events );
 
 Registers a plugin object to receive C<@events> of type C<$type>.
 
-This is frequently called from within the plugin's registration handler:
+This is frequently called from within the plugin's registration handler 
+(see L</plugin_register>):
 
   ## In a plugin:
   sub plugin_register {
@@ -988,11 +999,18 @@ This is frequently called from within the plugin's registration handler:
     );
 
     $core->subscribe( $self, 'NOTIFY', 'all' );
+
+    EAT_NONE
   }
 
-Subscribe to 'all' to receive all events.
+Subscribe to B<all> to receive all events. It may be worth noting that 
+subscribing a lot of plugins to 'all' events will 
+cause a performance hit in L</_pluggable_process> dispatch versus 
+subscribing to specific events.
 
 =head3 unsubscribe
+
+B<Unsubscribe a plugin from subscribed events.>
 
 The unregister counterpart to L</subscribe>; stops delivering
 specified events to a plugin.
@@ -1000,6 +1018,11 @@ specified events to a plugin.
 Carries the same arguments as L</subscribe>.
 
 =head3 plugin_register
+
+B<Defined in your plugin(s) and called at load time.>
+
+(Note that 'plugin_' is just a default register method prefix; it can be 
+changed prior to loading plugins. See L</_pluggable_init> for details.)
 
 The C<plugin_register> method is called on a loaded plugin when it is 
 added to the pipeline; it is passed the plugin object (C<$self>), the 
@@ -1012,12 +1035,24 @@ events after load-time:
   sub plugin_register {
     my ($self, $core, @args) = @_;
     $core->subscribe( $self, 'NOTIFY', @events );
+    EAT_NONE
   }
 
 =head3 plugin_unregister
 
+B<Defined in your plugin(s) and called at load time.>
+
+(Note that 'plugin_' is just a default register method prefix; it can be 
+changed prior to loading plugins. See L</_pluggable_init> for details.)
+
 The unregister counterpart to L</plugin_register>, called when the object 
-is removed from the pipeline by normal means.
+is removed from the pipeline (via L</plugin_del> or 
+L</_pluggable_destroy>).
+
+  sub plugin_unregister {
+    my ($self, $core) = @_;
+    EAT_NONE
+  }
 
 Carries the same arguments.
 
@@ -1095,7 +1130,7 @@ indicate that an event should be eaten after plugin processing
 is complete, 'EAT_PLUGIN' to stop plugin processing, and 'EAT_ALL' 
 to indicate that the event should not be dispatched further.
 
-=head2 Public Methods
+=head2 Plugin Management Methods
 
 Plugin pipeline manipulation methods will set C<$@>, C<carp()>, and return 
 empty list on error (unless otherwise noted). See L</plugin_error> 
@@ -1241,13 +1276,16 @@ Returns -1 if the plugin cannot be bumped down any farther.
 
 =head2 Internal events
 
+These events are dispatched to L</_pluggable_event> prefixed with our 
+pluggable event prefix; see L</_pluggable_init>.
+
 =head3 plugin_error
 
 Issued via L</_pluggable_event> when an error occurs.
 
-The first argument is always the error string; if it wasn't our consumer 
-class that threw the error, the source object is included as the second 
-argument.
+The arguments are, respectively: the error string, the offending object, 
+and a string describing the offending object ('self' or 'plugin' with name 
+appended).
 
 =head3 plugin_added
 
