@@ -1,5 +1,5 @@
 package MooX::Role::Pluggable;
-our $VERSION = '0.09_01';
+our $VERSION = '0.10_01';
 
 use 5.10.1;
 use Moo::Role;
@@ -890,7 +890,7 @@ as well as a flexible dispatch system (see L</_pluggable_process>).
 The logic and behavior is based almost entirely on L<Object::Pluggable>. 
 Some methods are the same; implementation & interface differ some and you 
 will still want to read thoroughly if coming from L<Object::Pluggable>. 
-Dispatch is a bit faster -- see L</Performance>.
+Dispatch is significantly faster -- see L</Performance>.
 
 It may be worth noting that this is nothing at all like the Moose 
 counterpart L<MooseX::Role::Pluggable>. If the names confuse ... well, I 

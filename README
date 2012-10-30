@@ -125,7 +125,7 @@ DESCRIPTION
     The logic and behavior is based almost entirely on Object::Pluggable.
     Some methods are the same; implementation & interface differ some and
     you will still want to read thoroughly if coming from Object::Pluggable.
-    Dispatch is a bit faster -- see "Performance".
+    Dispatch is significantly faster -- see "Performance".
 
     It may be worth noting that this is nothing at all like the Moose
     counterpart MooseX::Role::Pluggable. If the names confuse ... well, I
@@ -180,15 +180,18 @@ DESCRIPTION
    _pluggable_destroy
       $self->_pluggable_destroy;
 
-    Shuts down the plugin pipeline, unregistering all known plugins.
+    Shuts down the plugin pipeline, unregistering/unloading all known
+    plugins.
 
    _pluggable_event
+      ## In our consumer
       sub _pluggable_event {
         my ($self, $event, @args) = @_;
         ## Dispatch out, perhaps.
       }
 
-    "_pluggable_event" is called for internal notifications.
+    "_pluggable_event" is called for internal notifications, such as plugin
+    load/unload and error reporting (see "Internal events").
 
     It should be overriden in your consuming class to do something useful
     with the dispatched event (and any other arguments passed in).
@@ -198,12 +201,21 @@ DESCRIPTION
     Also see "Internal events"
 
   Registration
+    A plugin is any blessed object that is registered with your Pluggable
+    object via "plugin_add" and usually subscribed to some events via
+    "subscribe".
+
+    See "plugin_add" regarding loading plugins.
+
    subscribe
+    Subscribe a plugin to some pluggable events.
+
       $self->subscribe( $plugin_obj, $type, @events );
 
     Registers a plugin object to receive @events of type $type.
 
-    This is frequently called from within the plugin's registration handler:
+    This is frequently called from within the plugin's registration handler
+    (see "plugin_register"):
 
       ## In a plugin:
       sub plugin_register {
@@ -217,17 +229,29 @@ DESCRIPTION
         );
 
         $core->subscribe( $self, 'NOTIFY', 'all' );
+
+        EAT_NONE
       }
 
-    Subscribe to 'all' to receive all events.
+    Subscribe to all to receive all events. It may be worth noting that
+    subscribing a lot of plugins to 'all' events will cause a performance
+    hit in "_pluggable_process" dispatch versus subscribing to specific
+    events.
 
    unsubscribe
+    Unsubscribe a plugin from subscribed events.
+
     The unregister counterpart to "subscribe"; stops delivering specified
     events to a plugin.
 
     Carries the same arguments as "subscribe".
 
    plugin_register
+    Defined in your plugin(s) and called at load time.
+
+    (Note that 'plugin_' is just a default register method prefix; it can be
+    changed prior to loading plugins. See "_pluggable_init" for details.)
+
     The "plugin_register" method is called on a loaded plugin when it is
     added to the pipeline; it is passed the plugin object ($self), the
     Pluggable object, and any arguments given to "plugin_add" (or similar
@@ -239,11 +263,22 @@ DESCRIPTION
       sub plugin_register {
         my ($self, $core, @args) = @_;
         $core->subscribe( $self, 'NOTIFY', @events );
+        EAT_NONE
       }
 
    plugin_unregister
+    Defined in your plugin(s) and called at load time.
+
+    (Note that 'plugin_' is just a default register method prefix; it can be
+    changed prior to loading plugins. See "_pluggable_init" for details.)
+
     The unregister counterpart to "plugin_register", called when the object
-    is removed from the pipeline by normal means.
+    is removed from the pipeline (via "plugin_del" or "_pluggable_destroy").
+
+      sub plugin_unregister {
+        my ($self, $core) = @_;
+        EAT_NONE
+      }
 
     Carries the same arguments.
 
@@ -318,7 +353,7 @@ DESCRIPTION
     processing is complete, 'EAT_PLUGIN' to stop plugin processing, and
     'EAT_ALL' to indicate that the event should not be dispatched further.
 
-  Public Methods
+  Plugin Management Methods
     Plugin pipeline manipulation methods will set $@, "carp()", and return
     empty list on error (unless otherwise noted). See "plugin_error"
     regarding errors raised during plugin registration and dispatch.
@@ -449,12 +484,15 @@ DESCRIPTION
     Returns -1 if the plugin cannot be bumped down any farther.
 
   Internal events
+    These events are dispatched to "_pluggable_event" prefixed with our
+    pluggable event prefix; see "_pluggable_init".
+
    plugin_error
     Issued via "_pluggable_event" when an error occurs.
 
-    The first argument is always the error string; if it wasn't our consumer
-    class that threw the error, the source object is included as the second
-    argument.
+    The arguments are, respectively: the error string, the offending object,
+    and a string describing the offending object ('self' or 'plugin' with
+    name appended).
 
    plugin_added
     Issued via "_pluggable_event" when a new plugin is registered.
@@ -472,15 +510,19 @@ DESCRIPTION
 
     Some Benchmark runs. 30000 "_pluggable_process" calls with 20 loaded
     plugins dispatching one argument to one handler that does nothing except
-    return EAT_NONE: Rate object-pluggable 6148/s moox-role-pluggable 8065/s
+    return EAT_NONE:
 
-                           Rate
-            object-pluggable     6098/s
-            moox-role-pluggable  8108/s
+                          Rate    object-pluggable moox-role-pluggable
+      object-pluggable    6173/s                  --                -38%
+      moox-role-pluggable 9967/s                 61%
 
-                           Rate
-            object-pluggable     6122/s
-            moox-role-pluggable  8174/s
+                           Rate    object-pluggable moox-role-pluggable
+      object-pluggable     6224/s                  --                -38%
+      moox-role-pluggable 10000/s                 61%                  --
+
+                          Rate    object-pluggable moox-role-pluggable
+      object-pluggable    6383/s                  --                -35%
+      moox-role-pluggable 9868/s                 55%
 
     (Benchmark script is available in the "bench/" directory of the upstream
     repository; see <https://github.com/avenj/moox-role-pluggable>)
