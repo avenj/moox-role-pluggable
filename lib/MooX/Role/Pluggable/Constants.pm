@@ -9,7 +9,7 @@ use constant {
   EAT_ALL    => 4,
 };
 
-use base 'Exporter';
+use parent 'Exporter';
 
 our @EXPORT = qw/
   EAT_NONE
