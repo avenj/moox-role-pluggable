@@ -15,8 +15,7 @@ sub test_expected_ok {
   for my $test (keys %$expected) {
 
     unless (exists $got->{$test}) {
-      fail($desc);
-      diag("No result for test '$test'");
+      fail("No result for test $test in $desc");
       next
     }
 
@@ -24,7 +23,7 @@ sub test_expected_ok {
       is_deeply($got->{$test}, $expected->{$test}, $test)
     } else {
       is($got->{$test}, $expected->{$test}, $test)
-        or diag ("$desc failed")
+        or diag("$desc failed")
     }
 
   }
