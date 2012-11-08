@@ -9,3 +9,4 @@ META.yml
 README
 t/01_plug.t
 t/02_manip.t
+t/inc/MxRPTestUtils.pm
