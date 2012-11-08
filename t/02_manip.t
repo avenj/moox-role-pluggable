@@ -35,8 +35,12 @@ my $dispatcher_expected = {
   sub do_test_events {
     my ($self) = @_;
 
-    dies_ok(sub { $self->_pluggable_init( types => '' ) });
-    dies_ok(sub { $self->_pluggable_process('type', 'event') });
+    dies_ok(sub { $self->_pluggable_init( types => '' ) },
+      'Bad args _pluggable_init dies'
+    );
+    dies_ok(sub { $self->_pluggable_process('type', 'event') },
+      'Bad args _pluggable_process dies'
+    );
 
     $self->process( 'test', 0 );
     $self->process( 'eatable' );
