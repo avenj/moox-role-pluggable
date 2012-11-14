@@ -1,7 +1,9 @@
 #!/usr/bin/env perl
 use strict; use warnings FATAL => 'all';
+use 5.10.1;
 
-my $count = 30_000;
+my $pcount = $ARGV[0] // 20;
+my $count  = $ARGV[1] // 30_000;
 
 {
   package
@@ -81,11 +83,12 @@ use Benchmark ':all';
 my $op_disp = Disp::O::P->new;
 my $mx_disp = Disp::MX::P->new;
 $op_disp->plugin_add( 'A'.$_ => Plug::O::P->new )
-      for 1 .. 20;
+      for 1 .. $pcount;
 $mx_disp->plugin_add( 'B'.$_ => Plug::MX::P->new )
-      for 1 .. 20;
+      for 1 .. $pcount;
 
 use feature 'say';
+say "$count runs for $pcount plugins";
 say "Object::Pluggable ".$Object::Pluggable::VERSION;
 say "MooX::Role::Pluggable ".$MooX::Role::Pluggable::VERSION;
 
