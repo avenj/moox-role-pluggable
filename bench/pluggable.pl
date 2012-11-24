@@ -14,7 +14,7 @@ my $count  = $ARGV[1] // 30_000;
 
   sub plugin_register {
     my ($self, $core) = @_;
-    $core->plugin_register( $self, 'SERVER', 'test' );
+    $core->plugin_register( $self, 'SERVER', 'test', 'eat' );
     1
   }
   sub plugin_unregister {
@@ -22,6 +22,9 @@ my $count  = $ARGV[1] // 30_000;
   }
   sub S_test {
     1
+  }
+  sub S_eat {
+    2
   }
 }
 
@@ -34,7 +37,7 @@ my $count  = $ARGV[1] // 30_000;
 
   sub plugin_register {
     my ($self, $core) = @_;
-    $core->subscribe( $self, 'NOTIFY', 'test' );
+    $core->subscribe( $self, 'NOTIFY', 'test', 'eat' );
     1
   }
   sub plugin_unregister {
@@ -43,6 +46,18 @@ my $count  = $ARGV[1] // 30_000;
   sub N_test {
     1
   }
+  sub N_eat {
+    2
+  }
+}
+
+{
+  package
+    Plug::NoEvents;
+  use strict; use warnings FATAL => 'all';
+  sub new { bless [], shift }
+  sub plugin_register { 1 }
+  sub plugin_unregister { 1 }
 }
 
 {
@@ -84,11 +99,14 @@ my $op_disp = Disp::O::P->new;
 my $mx_disp = Disp::MX::P->new;
 $op_disp->plugin_add( 'A'.$_ => Plug::O::P->new )
       for 1 .. $pcount;
+$op_disp->plugin_add( 'Null'.$_ => Plug::NoEvents->new )
+      for 1 .. $pcount;
 $mx_disp->plugin_add( 'B'.$_ => Plug::MX::P->new )
       for 1 .. $pcount;
-
+$mx_disp->plugin_add( 'Null'.$_ => Plug::NoEvents->new )
+     for 1 .. $pcount;
 use feature 'say';
-say "$count runs for $pcount plugins";
+say "$count runs for $pcount x2 plugins";
 say "Object::Pluggable ".$Object::Pluggable::VERSION;
 say "MooX::Role::Pluggable ".$MooX::Role::Pluggable::VERSION;
 
@@ -96,9 +114,13 @@ say "MooX::Role::Pluggable ".$MooX::Role::Pluggable::VERSION;
 my %stuff = ( $count, +{
   'object-pluggable' => sub {
     $op_disp->process( 'test', 'things' );
+    $op_disp->process( 'eat', 'stuff' );
+    $op_disp->process( 'not_handled' );
   },
   'moox-role-pluggable' => sub {
     $mx_disp->process( 'test', 'things' );
+    $mx_disp->process( 'eat', 'stuff' );
+    $op_disp->process( 'not_handled' );
   },
 } );
 

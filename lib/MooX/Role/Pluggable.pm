@@ -141,36 +141,30 @@ sub _pluggable_process {
      ## Don't plugin-process, just return EAT_NONE.
      ## (Higher levels like Emitter can still pick this up.)
     return $retval
-  } elsif ($self_ret == EAT_CLIENT ) {
+  } elsif ( $self_ret == EAT_CLIENT ) {
      ## Plugin process, but return EAT_ALL after.
     $retval = EAT_ALL
-  } elsif ($self_ret == EAT_ALL ) {
+  } elsif ( $self_ret == EAT_ALL ) {
     return EAT_ALL
   }
 
   if (@extra) {
-    push @$args, @extra;
-    @extra = ();
+    push @$args, splice @extra, 0, scalar(@extra);
   }
 
   my $handle_ref = $self->__pluggable_loaded->{HANDLE};
 
   my $plug_ret;
-  PLUG: for my $thisplug (@{ $self->__pluggable_pipeline }) {
 
-    if ( 
-         $self == $thisplug
-      || (
-             !exists $handle_ref->{$thisplug}->{$type}->{$event}
-          && !exists $handle_ref->{$thisplug}->{$type}->{all}
-         )
-    ) {
-      next PLUG
-    }
+  my @plugs = grep {;
+    exists $handle_ref->{$_}->{$type}->{$event}
+    || exists $handle_ref->{$_}->{$type}->{all}
+    && $self != $_
+  } @{ $self->__pluggable_pipeline };
 
+  PLUG: for my $thisplug (@plugs) {
     undef $plug_ret;
     ## Using by_ref is nicer, but the method call is too much overhead.
-    ## Gained ~2000 calls/sec by skipping it:
     my $this_alias = $self->__pluggable_loaded->{OBJ}->{$thisplug};
 
     if      ( my $sub = $thisplug->can($meth) ) {
@@ -202,8 +196,7 @@ sub _pluggable_process {
     }
 
     if (@extra) {
-      push @$args, @extra;
-      @extra = ();
+      push @$args, splice @extra, 0, scalar(@extra);
     }
 
   }  ## PLUG
@@ -231,9 +224,7 @@ sub __plugin_process_chk {
     );
 
     return
-  }
-
-  if (! defined $_[3] ||
+  } elsif (! defined $_[3] ||
       ( $_[3] != EAT_NONE   && $_[3] != EAT_ALL &&
         $_[3] != EAT_CLIENT && $_[3] != EAT_PLUGIN ) ) {
 
