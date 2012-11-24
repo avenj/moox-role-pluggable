@@ -10,6 +10,7 @@ my $dispatcher_expected = {
   'plugin_added args correct'     => 6,
   'Got plugin_removed'            => 6,
   '_default triggered'            => 1,
+  'EAT_CLIENT was eaten'          => 1,
 };
 
 {
@@ -25,6 +26,7 @@ my $dispatcher_expected = {
   sub process {
     my ($self, $event, @args) = @_;
     my $retval = $self->_pluggable_process( 'PROCESS', $event, \@args );
+    $retval
   }
 
   sub shutdown {
@@ -45,6 +47,8 @@ my $dispatcher_expected = {
     $self->process( 'test', 0 );
     $self->process( 'eatable' );
     $self->process( 'not_handled' );
+    $dispatcher_got->{'EAT_CLIENT was eaten'}++
+      if $self->process( 'eat_client' ) == EAT_ALL;
   }
 
   around '_pluggable_event' => sub {
@@ -127,6 +131,10 @@ my $pluginA_expected = {
     $pluginA_got->{'Got plugin_unregister'}++;
 
     EAT_NONE
+  }
+
+  sub P_eat_client {
+    EAT_CLIENT
   }
 
   sub P_eatable {
