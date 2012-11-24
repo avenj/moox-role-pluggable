@@ -153,16 +153,13 @@ sub _pluggable_process {
   }
 
   my $handle_ref = $self->__pluggable_loaded->{HANDLE};
-
   my $plug_ret;
-
-  my @plugs = grep {;
-    exists $handle_ref->{$_}->{$type}->{$event}
-    || exists $handle_ref->{$_}->{$type}->{all}
-    && $self != $_
-  } @{ $self->__pluggable_pipeline };
-
-  PLUG: for my $thisplug (@plugs) {
+  PLUG: for my $thisplug (
+    grep {;
+        exists $handle_ref->{$_}->{$type}->{$event}
+        || exists $handle_ref->{$_}->{$type}->{all}
+        && $self != $_
+      } @{ $self->__pluggable_pipeline } )  {
     undef $plug_ret;
     ## Using by_ref is nicer, but the method call is too much overhead.
     my $this_alias = $self->__pluggable_loaded->{OBJ}->{$thisplug};
