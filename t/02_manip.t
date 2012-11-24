@@ -203,6 +203,10 @@ my $pluginB_expected = {
     $pluginB_got->{'Got P_test'}++;
     EAT_NONE
   }
+
+  sub P_default {
+    fail("default should not have triggered in plug B");
+  }
 }
 
 my $disp = MyDispatcher->new;

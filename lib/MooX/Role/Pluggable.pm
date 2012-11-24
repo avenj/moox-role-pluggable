@@ -90,17 +90,15 @@ sub _pluggable_process {
   my ($self, $type, $event, $args) = @_;
 
   ## This is essentially the same logic as Object::Pluggable.
-  ## Profiled and tightened up a bit:
+  ## Profiled, rewritten, and tightened up a bit;
   ##
   ##   - Error handling is much faster as a normal sub
   ##     Still need $self to dispatch _pluggable_event, but skipping method
   ##     resolution and passing $self on the stack added a few hundred 
-  ##     extra calls/sec.
+  ##     extra calls/sec, and override seems like an acceptable sacrifice
+  ##     Additionally our error handler is optimized
   ##
-  ##     Additionally our error handler does significantly less argument
-  ##     unpacking, only unpacking if there is actually an error to handle.
-  ##
-  ##   - We do not invoke the regex engine at all, saving a fair bit of 
+  ##   - Do not invoke the regex engine at all, saving a fair bit of 
   ##     time; checking index() and applying substr() as needed to strip
   ##     event prefixes is significantly quicker.
   ##
