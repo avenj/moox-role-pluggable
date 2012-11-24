@@ -121,16 +121,16 @@ sub _pluggable_process {
 
   local $@;
 
-  if      ( my $sub = $self->can($meth) ) {
+  if      ( $self->can($meth) ) {
     ## Dispatch to ourself
     eval {;
-      $self_ret = $self->$sub($self, \(@$args), \@extra)
+      $self_ret = $self->$meth($self, \(@$args), \@extra)
     };
     __plugin_process_chk($self, $self, $meth, $self_ret);
-  } elsif ( $sub = $self->can('_default') ) {
+  } elsif ( $self->can('_default') ) {
     ## Dispatch to _default
     eval {;
-      $self_ret = $self->$sub($self, $meth, \(@$args), \@extra)
+      $self_ret = $self->_default($self, $meth, \(@$args), \@extra)
     };
     __plugin_process_chk($self, $self, '_default', $self_ret);
   }
@@ -164,14 +164,14 @@ sub _pluggable_process {
     ## Using by_ref is nicer, but the method call is too much overhead.
     my $this_alias = $self->__pluggable_loaded->{OBJ}->{$thisplug};
 
-    if      ( my $sub = $thisplug->can($meth) ) {
+    if      ( $thisplug->can($meth) ) {
       eval {;
-        $plug_ret = $thisplug->$sub($self, \(@$args), \@extra)
+        $plug_ret = $thisplug->$meth($self, \(@$args), \@extra)
       };
       __plugin_process_chk($self, $thisplug, $meth, $plug_ret, $this_alias);
-    } elsif ( $sub = $thisplug->can('_default') ) {
+    } elsif ( $thisplug->can('_default') ) {
       eval {;
-        $plug_ret = $thisplug->$sub($self, \(@$args), \@extra)
+        $plug_ret = $thisplug->_default($self, \(@$args), \@extra)
       };
       __plugin_process_chk($self, $thisplug, '_default', $plug_ret, $this_alias);
     }
@@ -853,7 +853,7 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
     return EAT_NONE
   }
 
-  ## A simple controller that interacts with our dispatcher.
+  ## An external package that interacts with our dispatcher.
   package MyController;
 
   use Moo;
@@ -881,8 +881,9 @@ A L<Moo::Role> for turning instances of your class into pluggable objects.
 Consumers of this role gain a plugin pipeline and methods to manipulate it,
 as well as a flexible dispatch system (see L</_pluggable_process>).
 
-The logic and behavior is based almost entirely on L<Object::Pluggable>. 
-Some methods are the same; implementation & interface differ some and you 
+The logic and behavior is based almost entirely on L<Object::Pluggable> 
+(see L</AUTHOR>). 
+Some methods are the same; implementation & interface differ and you 
 will still want to read thoroughly if coming from L<Object::Pluggable>. 
 Dispatch is significantly faster -- see L</Performance>.
 
@@ -1321,6 +1322,7 @@ repository; see L<https://github.com/avenj/moox-role-pluggable>)
 
 Jon Portnoy <avenj@cobaltirc.org>
 
-Based on L<Object::Pluggable> by BINGOS, HINRIK, APOCAL, japhy et al.
+Written from the ground up, but conceptually based entirely on 
+L<Object::Pluggable> by BINGOS, HINRIK, APOCAL, japhy et al.
 
 =cut
