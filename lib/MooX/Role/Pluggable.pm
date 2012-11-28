@@ -13,7 +13,7 @@ use Try::Tiny;
 use MooX::Role::Pluggable::Constants;
 
 ##
-use namespace::clean -except => 'meta';
+use namespace::clean;
 
 
 has '__pluggable_opts' => (
@@ -634,7 +634,7 @@ sub plugin_pipe_bump_down {
   my $pos = $idx + ($delta || 1);
 
   if ($pos >= @{ $self->__pluggable_pipeline }) {
-    carp "Cannot bump below end of pipeline, bumping to end"
+    carp "Cannot bump below end of pipeline, pushing to tail"
   }
 
   splice @{ $self->__pluggable_pipeline }, $pos, 0,
