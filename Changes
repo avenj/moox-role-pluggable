@@ -1,5 +1,10 @@
 # Changes for MooX::Role::Pluggable
 
+ * 0.11  29 Nov 2012
+ 
+   More optimizations & test tweaks.
+
+
  * 0.10  29 Oct 2012
 
    Squeeze a couple hundred more calls/sec out of dispatch by skipping

@@ -95,7 +95,7 @@ SYNOPSIS
         return EAT_NONE
       }
 
-      ## A simple controller that interacts with our dispatcher.
+      ## An external package that interacts with our dispatcher.
       package MyController;
 
       use Moo;
@@ -122,10 +122,11 @@ DESCRIPTION
     Consumers of this role gain a plugin pipeline and methods to manipulate
     it, as well as a flexible dispatch system (see "_pluggable_process").
 
-    The logic and behavior is based almost entirely on Object::Pluggable.
-    Some methods are the same; implementation & interface differ some and
-    you will still want to read thoroughly if coming from Object::Pluggable.
-    Dispatch is significantly faster -- see "Performance".
+    The logic and behavior is based almost entirely on Object::Pluggable
+    (see "AUTHOR"). Some methods are the same; implementation & interface
+    differ and you will still want to read thoroughly if coming from
+    Object::Pluggable. Dispatch is significantly faster -- see
+    "Performance".
 
     It may be worth noting that this is nothing at all like the Moose
     counterpart MooseX::Role::Pluggable. If the names confuse ... well, I
@@ -530,5 +531,6 @@ DESCRIPTION
 AUTHOR
     Jon Portnoy <avenj@cobaltirc.org>
 
-    Based on Object::Pluggable by BINGOS, HINRIK, APOCAL, japhy et al.
+    Written from the ground up, but conceptually based entirely on
+    Object::Pluggable by BINGOS, HINRIK, APOCAL, japhy et al.
 

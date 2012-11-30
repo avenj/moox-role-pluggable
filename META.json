@@ -45,7 +45,7 @@
    "provides" : {
       "MooX::Role::Pluggable" : {
          "file" : "lib/MooX/Role/Pluggable.pm",
-         "version" : "0.10"
+         "version" : "0.11"
       },
       "MooX::Role::Pluggable::Constants" : {
          "file" : "lib/MooX/Role/Pluggable/Constants.pm",
@@ -61,5 +61,5 @@
          "url" : "http://github.com/avenj/moox-role-pluggable.git"
       }
    },
-   "version" : "0.10"
+   "version" : "0.11"
 }
