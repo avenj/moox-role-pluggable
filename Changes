@@ -1,11 +1,16 @@
 # Changes for MooX::Role::Pluggable
 
- * 0.11  29 Nov 2012
+0.120001   (05 Feb 2013)
+   Depend on newer Moo (fixes Moose compat)
+   Switch to Dist::Zilla
+
+
+0.11  29 Nov 2012
  
    More optimizations & test tweaks.
 
 
- * 0.10  29 Oct 2012
+0.10  29 Oct 2012
 
    Squeeze a couple hundred more calls/sec out of dispatch by skipping
    an unnecessary method call:
@@ -15,7 +20,7 @@
   Some documentation improvements.
 
 
- * 0.09  28 Oct 2012
+0.09  28 Oct 2012
 
    Fix args dispatched via plugin_error.
    Include the object/src unconditionally.
@@ -24,14 +29,14 @@
      object-pluggable    6061/s
      moox-role-pluggable 8174/s
 
- * 0.08  28 Oct 2012
+0.08  28 Oct 2012
 
    Fix _pluggable_init ev_prefix vs event_prefix
    Documentation was incorrect, but no harm in accepting both.
    (Same goes for reg_prefix vs register_prefix)
 
 
- * 0.07  28 Oct 2012
+0.07  28 Oct 2012
 
    Further dispatcher optimizations:
                            Rate
@@ -39,22 +44,22 @@
      moox-role-pluggable 7009/s
 
 
- * 0.06  28 Oct 2012
+0.06  28 Oct 2012
 
    Optimize dispatcher.
 
 
- * 0.05  28 Oct 2012
+0.05  28 Oct 2012
 
    Fix plugin_error plugin object dispatch.
 
 
- * 0.04  25 Oct 2012
+0.04  25 Oct 2012
 
    Improved POD / tests
 
 
- * 0.03  21 Oct 2012
+0.03  21 Oct 2012
 
    When pipeline manipulation methods fail, carp() in addition to setting 
    $@ and returning empty list (or similar).
@@ -62,13 +67,13 @@
    Improved POD
 
 
- * 0.02  20 Oct 2012
+0.02  20 Oct 2012
 
    perl-5.10.1 should do, drop 5.12.1 dep
 
    Improved POD
 
 
- * 0.01  19 Oct 2012
+0.01  19 Oct 2012
 
    Initial release
