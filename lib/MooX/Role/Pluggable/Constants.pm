@@ -1,13 +1,10 @@
 package MooX::Role::Pluggable::Constants;
-
 use strictures 1;
 
-use constant {
-  EAT_NONE   => 1,
-  EAT_CLIENT => 2,
-  EAT_PLUGIN => 3,
-  EAT_ALL    => 4,
-};
+sub EAT_NONE   () { 1 }
+sub EAT_CLIENT () { 2 }
+sub EAT_PLUGIN () { 3 }
+sub EAT_ALL    () { 4 }
 
 use parent 'Exporter';
 

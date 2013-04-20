@@ -11,7 +11,7 @@ use Try::Tiny;
 
 use MooX::Role::Pluggable::Constants;
 
-##
+
 use namespace::clean;
 
 
@@ -51,7 +51,6 @@ sub _pluggable_destroy {
 sub _pluggable_event {
   ## This should be overriden to handle Pluggable events
   ##  ( plugin_{added, removed, error} )
-  return
 }
 
 sub _pluggable_init {
