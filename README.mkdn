@@ -136,7 +136,8 @@ It may be worth noting that this is nothing at all like the Moose
 counterpart [MooseX::Role::Pluggable](http://search.cpan.org/perldoc?MooseX::Role::Pluggable). If the names confuse ... well, I 
 lacked for better ideas. ;-)
 
-If you're using [POE](http://search.cpan.org/perldoc?POE), also see [MooX::Role::POE::Emitter](http://search.cpan.org/perldoc?MooX::Role::POE::Emitter).
+If you're using [POE](http://search.cpan.org/perldoc?POE), also see [MooX::Role::POE::Emitter](http://search.cpan.org/perldoc?MooX::Role::POE::Emitter), which consumes
+this role.
 
 ## Initialization
 

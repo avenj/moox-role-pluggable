@@ -1,5 +1,8 @@
 # Changes for MooX::Role::Pluggable
 
+0.120003   (19 Apr 2013)
+  Drop constant.pm
+
 0.120002   (07 Feb 2013)
   Missing dependency on Test::Exception
 
