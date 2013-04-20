@@ -887,7 +887,8 @@ It may be worth noting that this is nothing at all like the Moose
 counterpart L<MooseX::Role::Pluggable>. If the names confuse ... well, I 
 lacked for better ideas. ;-)
 
-If you're using L<POE>, also see L<MooX::Role::POE::Emitter>.
+If you're using L<POE>, also see L<MooX::Role::POE::Emitter>, which consumes
+this role.
 
 =head2 Initialization
 
