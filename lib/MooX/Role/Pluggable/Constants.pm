@@ -20,6 +20,12 @@ our @EXPORT = qw/
 
 =pod
 
+=begin Pod::Coverage
+
+EAT.+
+
+=end Pod::Coverage
+
 =head1 NAME
 
 MooX::Role::Pluggable::Constants - MooX::Role::Pluggable EAT values
