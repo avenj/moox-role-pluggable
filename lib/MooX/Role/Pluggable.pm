@@ -1,7 +1,6 @@
 package MooX::Role::Pluggable;
 
 use 5.10.1;
-use Moo::Role;
 
 use Carp;
 use strictures 1;
@@ -12,7 +11,7 @@ use Try::Tiny;
 use MooX::Role::Pluggable::Constants;
 
 
-use namespace::clean;
+use Moo::Role;
 
 
 has '__pluggable_opts' => (
