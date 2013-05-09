@@ -1,12 +1,21 @@
 # Changes for MooX::Role::Pluggable
 
+0.120004   (09 May 2013)
+
+  Fix '_default' dispatch to plugins; event name was missing from args.
+
+  POD cleanups/clarifications. Could still use work.
+
 0.120003   (19 Apr 2013)
+
   Drop constant.pm
 
 0.120002   (07 Feb 2013)
+
   Missing dependency on Test::Exception
 
 0.120001   (05 Feb 2013)
+
   Depend on newer Moo (fixes Moose compat)
   Switch to Dist::Zilla
 
