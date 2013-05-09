@@ -9,6 +9,8 @@ my $dispatcher_expected = {
   'P_test dispatch order correct' => 1,
   'plugin_added args correct'     => 6,
   'Got plugin_removed'            => 6,
+  'Got plugin_error'              => 1,
+  'plugin_error correct error'    => 1,
   '_default triggered'            => 1,
   'EAT_CLIENT was eaten'          => 1,
 };
@@ -49,6 +51,7 @@ my $dispatcher_expected = {
     $self->process( 'not_handled' );
     $dispatcher_got->{'EAT_CLIENT was eaten'}++
       if $self->process( 'eat_client' ) == EAT_ALL;
+    $self->process( 'dies' );
   }
 
   around '_pluggable_event' => sub {
@@ -67,6 +70,12 @@ my $dispatcher_expected = {
     EAT_NONE
   }
 
+  sub P_dies {
+    my ($self, undef) = splice @_, 0, 2;
+    Test::More::diag("This will throw warning noise:");
+    die "Plugin event died!";
+  }
+
   sub P_plugin_added {
     ## +6 tests for reloads
     my ($self, undef) = splice @_, 0, 2;
@@ -81,6 +90,20 @@ my $dispatcher_expected = {
 
   sub P_plugin_removed {
     $dispatcher_got->{'Got plugin_removed'}++;
+    EAT_ALL
+  }
+
+  sub P_plugin_error {
+    my ($self, undef) = splice @_, 0, 2;
+    my $err = ${ $_[0] };
+    my $obj = ${ $_[1] };
+    my $src = ${ $_[2] };
+
+    $dispatcher_got->{'Got plugin_error'}++;
+
+    $dispatcher_got->{'plugin_error correct error'}++
+      if $err =~ /Plugin event died/;
+
     EAT_ALL
   }
 
@@ -154,10 +177,11 @@ my $pluginA_expected = {
   }
 
   sub _default {
-    my ($self, undef) = splice @_, 0, 2;
+    my ($self, $core) = splice @_, 0, 2;
     my $event = $_[0];
     ## Should have been EATen by dispatcher
-    fail("_default should not have triggered in plugin");
+    fail("_default should not have triggered in plugin but got $event")
+      unless $event eq 'P_dies';
   }
 }
 

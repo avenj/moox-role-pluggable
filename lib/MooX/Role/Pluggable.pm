@@ -29,9 +29,9 @@ has '__pluggable_loaded' => (
   is      => 'ro',
   default => sub { 
    +{
-      ALIAS  => {},  ## Objs keyed by aliases
-      OBJ    => {},  ## Aliases keyed by obj
-      HANDLE => {},  ## Type/event map hashes keyed by obj
+      ALIAS  => {},  # Objs keyed by aliases
+      OBJ    => {},  # Aliases keyed by obj
+      HANDLE => {},  # Type/event map hashes keyed by obj
     },
   },
 );
@@ -48,8 +48,8 @@ sub _pluggable_destroy {
 }
 
 sub _pluggable_event {
-  ## This should be overriden to handle Pluggable events
-  ##  ( plugin_{added, removed, error} )
+  # This should be overriden to handle Pluggable events
+  #  ( plugin_{added, removed, error} )
 }
 
 sub _pluggable_init {
@@ -86,22 +86,22 @@ sub _pluggable_init {
 sub _pluggable_process {
   my ($self, $type, $event, $args) = @_;
 
-  ## This is essentially the same logic as Object::Pluggable.
-  ## Profiled, rewritten, and tightened up a bit;
-  ##
-  ##   - Error handling is much faster as a normal sub
-  ##     Still need $self to dispatch _pluggable_event, but skipping method
-  ##     resolution and passing $self on the stack added a few hundred 
-  ##     extra calls/sec, and override seems like an acceptable sacrifice
-  ##     Additionally our error handler is optimized
-  ##
-  ##   - Do not invoke the regex engine at all, saving a fair bit of 
-  ##     time; checking index() and applying substr() as needed to strip
-  ##     event prefixes is significantly quicker.
-  ##
-  ##   - Conditionals have been optimized a bit.
-  ##
-  ## I'm open to other ideas . . .
+  # This is essentially the same logic as Object::Pluggable.
+  # Profiled, rewritten, and tightened up a bit;
+  #
+  #   - Error handling is much faster as a normal sub
+  #     Still need $self to dispatch _pluggable_event, but skipping method
+  #     resolution and passing $self on the arg stack added a few hundred 
+  #     extra calls/sec, and override seems like an acceptable sacrifice
+  #     Additionally our error handler is optimized
+  #
+  #   - Do not invoke the regex engine at all, saving a fair bit of 
+  #     time; checking index() and applying substr() as needed to strip
+  #     event prefixes is significantly quicker.
+  #
+  #   - Conditionals have been optimized a bit.
+  #
+  # I'm open to other ideas . . .
   unless (ref $args) {
     confess 'Expected a type, event, and (possibly empty) args ARRAY'
   }
@@ -117,13 +117,13 @@ sub _pluggable_process {
   local $@;
 
   if      ( $self->can($meth) ) {
-    ## Dispatch to ourself
+    # Dispatch to ourself
     eval {;
       $self_ret = $self->$meth($self, \(@$args), \@extra)
     };
     __plugin_process_chk($self, $self, $meth, $self_ret);
   } elsif ( $self->can('_default') ) {
-    ## Dispatch to _default
+    # Dispatch to _default
     eval {;
       $self_ret = $self->_default($self, $meth, \(@$args), \@extra)
     };
@@ -131,13 +131,13 @@ sub _pluggable_process {
   }
 
   if      (! defined $self_ret) {
-    ## No-op.
+    # No-op.
   } elsif ( $self_ret == EAT_PLUGIN ) {
-     ## Don't plugin-process, just return EAT_NONE.
-     ## (Higher levels like Emitter can still pick this up.)
+     # Don't plugin-process, just return EAT_NONE.
+     # (Higher levels like Emitter can still pick this up.)
     return $retval
   } elsif ( $self_ret == EAT_CLIENT ) {
-     ## Plugin process, but return EAT_ALL after.
+     # Plugin process, but return EAT_ALL after.
     $retval = EAT_ALL
   } elsif ( $self_ret == EAT_ALL ) {
     return EAT_ALL
@@ -156,7 +156,7 @@ sub _pluggable_process {
         && $self != $_
       } @{ $self->__pluggable_pipeline } )  {
     undef $plug_ret;
-    ## Using by_ref is nicer, but the method call is too much overhead.
+    # Using by_ref is nicer, but the method call is too much overhead.
     my $this_alias = $self->__pluggable_loaded->{OBJ}->{$thisplug};
 
     if      ( $thisplug->can($meth) ) {
@@ -166,22 +166,22 @@ sub _pluggable_process {
       __plugin_process_chk($self, $thisplug, $meth, $plug_ret, $this_alias);
     } elsif ( $thisplug->can('_default') ) {
       eval {;
-        $plug_ret = $thisplug->_default($self, \(@$args), \@extra)
+        $plug_ret = $thisplug->_default($self, $meth, \(@$args), \@extra)
       };
       __plugin_process_chk($self, $thisplug, '_default', $plug_ret, $this_alias);
     }
 
     if      (! defined $plug_ret) {
-       ## No-op.
+       # No-op.
     } elsif ($plug_ret == EAT_PLUGIN) {
-       ## Stop plugin-processing.
-       ## Return EAT_ALL if we previously had a EAT_CLIENT
-       ## Return EAT_NONE otherwise
+       # Stop plugin-processing.
+       # Return EAT_ALL if we previously had a EAT_CLIENT
+       # Return EAT_NONE otherwise
       return $retval
     } elsif ($plug_ret == EAT_CLIENT) {
-       ## Set a pending EAT_ALL.
-       ## If another plugin in the pipeline returns EAT_PLUGIN,
-       ## we'll tell higher layers like Emitter to EAT_ALL
+       # Set a pending EAT_ALL.
+       # If another plugin in the pipeline returns EAT_PLUGIN,
+       # we'll tell higher layers like Emitter to EAT_ALL
       $retval = EAT_ALL
     } elsif ($plug_ret == EAT_ALL) {
       return EAT_ALL
@@ -191,13 +191,13 @@ sub _pluggable_process {
       push @$args, splice @extra, 0, scalar(@extra);
     }
 
-  }  ## PLUG
+  }  # PLUG
 
   $retval
 }
 
 sub __plugin_process_chk {
-  ## Ugly as sin, but fast if there are no errors, which matters here.
+  # Ugly as sin, but fast if there are no errors, which matters here.
 
   if ($@) {
     chomp $@;
@@ -239,7 +239,7 @@ sub __plugin_process_chk {
 }
 
 
-### Basic plugin manipulation (add/del/get/replace ...)
+## Basic plugin manipulation (add/del/get/replace ...)
 
 sub plugin_add {
   my ($self, $alias, $plugin, @args) = @_;
@@ -281,14 +281,14 @@ sub plugin_replace {
   my ($self, %params) = @_;
   $params{lc $_} = delete $params{$_} for keys %params;
 
-  ## ->plugin_replace(
-  ##   old    => $obj || $alias,
-  ##   alias  => $newalias,
-  ##   plugin => $newplug,
-  ## # optional:
-  ##   unregister_args => ARRAY
-  ##   register_args   => ARRAY
-  ## )
+  # ->plugin_replace(
+  #   old    => $obj || $alias,
+  #   alias  => $newalias,
+  #   plugin => $newplug,
+  # # optional:
+  #   unregister_args => ARRAY
+  #   register_args   => ARRAY
+  # )
 
   for (qw/old alias plugin/) {
     confess "Missing required param $_"
@@ -329,7 +329,7 @@ sub plugin_replace {
 }
 
 
-### Event registration.
+## Event registration.
 
 sub subscribe {
   my ($self, $plugin, $type, @events) = @_;
@@ -406,7 +406,7 @@ sub unsubscribe {
 }
 
 
-### Pipeline methods.
+## Pipeline methods.
 
 sub plugin_pipe_push {
   my ($self, $alias, $plug, @args) = @_;
@@ -513,12 +513,12 @@ sub plugin_pipe_get_index {
 sub plugin_pipe_insert_before {
   my ($self, %params) = @_;
   $params{lc $_} = delete $params{$_} for keys %params;
-  ## ->insert_before(
-  ##   before =>
-  ##   alias  =>
-  ##   plugin =>
-  ##   register_args =>
-  ## );
+  # ->insert_before(
+  #   before =>
+  #   alias  =>
+  #   plugin =>
+  #   register_args =>
+  # );
 
   for (qw/before alias plugin/) {
     confess "Missing required param $_"
@@ -643,8 +643,8 @@ sub plugin_pipe_bump_down {
 sub __plug_pipe_register {
   my ($self, $new_alias, $new_plug, @args) = @_;
 
-  ## Register this as a known plugin.
-  ## Try to call $reg_prefix . "register"
+  # Register this as a known plugin.
+  # Try to call $reg_prefix . "register"
 
   my ($retval, $err);
   my $meth = $self->__pluggable_opts->{reg_prefix} . "register" ;
@@ -755,18 +755,16 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
 
 =head1 SYNOPSIS
 
-  ## A simple pluggable dispatcher.
+  # A simple pluggable dispatcher:
   package MyDispatcher;
   use Moo;
-
   use MooX::Role::Pluggable::Constants;
-
   with 'MooX::Role::Pluggable';
 
   sub BUILD {
     my ($self) = @_;
 
-    ## (optionally) Configure our plugin pipeline
+    # (optionally) Configure our plugin pipeline
     $self->_pluggable_init(
       reg_prefix => 'Plug_',
       ev_prefix  => 'Event_',
@@ -778,7 +776,7 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
   }
 
   around '_pluggable_event' => sub {
-    ## Override redirecting internal events to process()
+    # This override redirects internal events (errors, etc) to ->process()
     my ($orig, $self) = splice @_, 0, 2;
     $self->process( @_ )
   };
@@ -786,26 +784,46 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
   sub process {
     my ($self, $event, @args) = @_;
 
-    ## Dispatch to 'P_' prefixed "PROCESS" type handlers:
-    my $retval = $self->_pluggable_process( 'PROCESS',
+    # Dispatch to 'P_' prefixed "PROCESS" type handlers.
+    #
+    # _pluggable_process will automatically strip a leading 'ev_prefix'
+    # (see the call to _pluggable_init above); that lets us easily
+    # dispatch errors to our P_plugin_error handler below without worrying
+    # about our ev_prefix ourselves:
+    my $retval = $self->_pluggable_process( PROCESS =>
       $event,
       \@args
     );
 
     unless ($retval == EAT_ALL) {
-      ## The pipeline allowed the event to continue.
-      ## A dispatcher might re-dispatch elsewhere, etc.
+      # The pipeline allowed the event to continue.
+      # A dispatcher might re-dispatch elsewhere, etc.
     }
   }
 
   sub shutdown {
     my ($self) = @_;
-    ## Unregister all of our plugins.
+    # Unregister all of our plugins.
     $self->_pluggable_destroy;
   }
 
+  sub P_plugin_error {
+    # Since we re-dispatched errors in our _pluggable_event handler,
+    # we could handle exceptions here and then eat them, perhaps:
+    my ($self, undef) = splice @_, 0, 2;
 
-  ## A Plugin object.
+    # Arguments are references:
+    my $plug_err  = ${ $_[0] };
+    my $plug_obj  = ${ $_[1] };
+    my $error_src = ${ $_[2] };
+
+    # ...
+    
+    EAT_ALL
+  }
+
+
+  # A Plugin object.
   package MyPlugin;
 
   use MooX::Role::Pluggable::Constants;
@@ -815,42 +833,43 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
   sub Plug_register {
     my ($self, $core) = @_;
 
-    ## Subscribe to events:
+    # Subscribe to events:
     $core->subscribe( $self, 'PROCESS',
-      qw/
-        my_event
-      /,
+      'my_event', 
+      'another_event'
     );
 
-    ## Log that we're here, do some initialization, etc.
+    # Log that we're here, do some initialization, etc ...
 
     return EAT_NONE
   }
 
   sub Plug_unregister {
     my ($self, $core) = @_;
-    ## Called at unregister-time.
+    # Called when this plugin is unregistered
+    # ... do some cleanup, etc ...
     return EAT_NONE
   }
 
   sub P_my_event {
-    ## Handle a dispatched "PROCESS"-type event
-
+    # Handle a dispatched "PROCESS"-type event:
     my ($self, $core) = splice @_, 0, 2;
 
-    ## Arguments are references and can be modified:
+    # Arguments are references and can be modified:
     my $arg = ${ $_[0] };
 
     . . .
 
-    ## Return an EAT constant to control event lifetime
-    ## EAT_NONE allows this event to continue through the pipeline
+    # Return an EAT constant to control event lifetime
+    # EAT_NONE allows this event to continue through the pipeline
     return EAT_NONE
   }
 
-  ## An external package that interacts with our dispatcher.
-  package MyController;
+  # An external package that interacts with our dispatcher;
+  # this is just a quick and dirty example to show external
+  # plugin manipulation:
 
+  package MyController;
   use Moo;
 
   has 'dispatcher' => (
@@ -894,19 +913,19 @@ this role.
 =head3 _pluggable_init
 
   $self->_pluggable_init(
-    ## Prefix for registration events.
-    ## Defaults to 'plugin_' ('plugin_register' / 'plugin_unregister')
+    # Prefix for registration events.
+    # Defaults to 'plugin_' ('plugin_register' / 'plugin_unregister')
     reg_prefix   => 'plugin_',
 
-    ## Prefix for dispatched internal events
-    ##  (add, del, error, register, unregister ...)
-    ## Defaults to 'plugin_ev_'
+    # Prefix for dispatched internal events
+    #  (add, del, error, register, unregister ...)
+    # Defaults to 'plugin_ev_'
     event_prefix => 'plugin_ev_',
 
-    ## Map type names to prefixes.
-    ## Event types are arbitrary.
-    ## Prefix is prepended when dispathing events of a particular type.
-    ## Defaults to: { NOTIFY => 'N', PROCESS => 'P' }
+    # Map type names to prefixes.
+    # Event types are arbitrary.
+    # Prefix is prepended when dispathing events of a particular type.
+    # Defaults to: { NOTIFY => 'N', PROCESS => 'P' }
     types => {
       NOTIFY  => 'N',
       PROCESS => 'P',
@@ -915,7 +934,7 @@ this role.
 
 A consumer can call B<_pluggable_init> to set up pipeline-related options 
 appropriately; this should be done prior to loading plugins or dispatching 
-to L</_pluggable_process>. If it is never called, the defaults 
+to L</_pluggable_process>. If it is not called, the defaults 
 (as shown above) are used.
 
 B<< types => >> can be either an ARRAY of event types (which will be used 
@@ -931,8 +950,14 @@ as prefixes):
   },
 
 A '_' is automatically appended to event type prefixes when events are 
-dispatched via L</_pluggable_process>, but not to 
-C<reg_prefix>/C<event_prefix>.
+dispatched via L</_pluggable_process>; thus, an event destined for our
+'Incoming' type shown above will be dispatched to appropriate C<I_> handlers:
+
+  # Dispatched to 'I_foo' method in plugins registered for Incoming 'foo':
+  $self->_pluggable_process( Incoming => 'foo', 'bar', 'baz' );
+
+C<reg_prefix>/C<event_prefix> are not automatically munged in any way.
+
 An empty string C<reg_prefix>/C<event_prefix> is valid.
 
 =head3 _pluggable_destroy
@@ -943,10 +968,10 @@ Shuts down the plugin pipeline, unregistering/unloading all known plugins.
 
 =head3 _pluggable_event
 
-  ## In our consumer
+  # In our consumer
   sub _pluggable_event {
     my ($self, $event, @args) = @_;
-    ## Dispatch out, perhaps.
+    # Dispatch out, perhaps.
   }
 
 C<_pluggable_event> is called for internal notifications, such as plugin 
@@ -957,13 +982,13 @@ the dispatched event (and any other arguments passed in).
 
 The C<$event> passed will be prefixed with the configured B<event_prefix>.
 
-Also see L</Internal events>
+Also see L</Internal events>.
 
 =head2 Registration
 
-A plugin is any blessed object that is registered with your Pluggable 
-object via L</plugin_add> and usually subscribed to some events via 
-L</subscribe>.
+A plugin is any blessed object that is registered with your Pluggable object
+via L</plugin_add>; during registration, plugins usually subscribe to some
+events via L</subscribe>.
 
 See L</plugin_add> regarding loading plugins.
 
@@ -978,26 +1003,28 @@ Registers a plugin object to receive C<@events> of type C<$type>.
 This is frequently called from within the plugin's registration handler 
 (see L</plugin_register>):
 
-  ## In a plugin:
+  # In a plugin:
   sub plugin_register {
     my ($self, $core) = @_;
 
-    $core->subscribe( $self, 'PROCESS',
+    $core->subscribe( $self, PROCESS =>
       qw/
         my_event
         another_event
       /
     );
 
-    $core->subscribe( $self, 'NOTIFY', 'all' );
+    $core->subscribe( $self, NOTIFY => 
+      'all' 
+    );
 
     EAT_NONE
   }
 
-Subscribe to B<all> to receive all events. It may be worth noting that 
+Subscribe to B<all> to receive all events. (It may be worth noting that 
 subscribing a lot of plugins to 'all' events will 
 cause a performance hit in L</_pluggable_process> dispatch versus 
-subscribing to specific events.
+subscribing to specific events.)
 
 =head3 unsubscribe
 
@@ -1005,6 +1032,8 @@ B<Unsubscribe a plugin from subscribed events.>
 
 The unregister counterpart to L</subscribe>; stops delivering
 specified events to a plugin.
+
+The plugin is still loaded and registered until L</plugin_del> is called.
 
 Carries the same arguments as L</subscribe>.
 
@@ -1067,10 +1096,10 @@ belonging to the plugin and the pluggable caller, respectively:
   my @args = qw/baz bar/;
   $self->_pluggable_process( 'NOTIFY', 'foo', \@args );
 
-  ## In a plugin:
+  # In a plugin:
   sub N_foo {
     my ($self, $core) = splice @_, 0, 2;
-    ## Dereferenced expected scalars:
+    # Dereferenced expected scalars:
     my $baz = ${ $_[0] };
     my $bar = ${ $_[1] };
   }
@@ -1084,6 +1113,7 @@ Dispatch process for C<$event> 'foo' of C<$type> 'NOTIFY':
     'foo' -> 'N_foo'
   - Attempt to dispatch to $self->N_foo()
   - If no such method, attempt to dispatch to $self->_default()
+    (The method we were attempting to call is prepended to arguments)
   - If the event was not eaten (see below), dispatch to plugins
 
 "Eaten" means a handler returned a EAT_* constant from 
@@ -1164,7 +1194,7 @@ Returns a list of loaded plugin aliases.
     old    => $alias_or_plugin_obj,
     alias  => $new_alias,
     plugin => $new_plugin_obj,
-    ## Optional:
+    # Optional:
     register_args   => [ ],
     unregister_args => [ ],
   );
@@ -1216,7 +1246,7 @@ In list context, returns the plugin object and alias, respectively.
 
   my $idx = $self->plugin_pipe_get_index( $alias_or_plugin_obj );
   if ($idx < 0) {
-    ## Plugin doesn't exist
+    # Plugin doesn't exist
   }
 
 Returns the position of the specified plugin in the pipeline.
@@ -1229,7 +1259,7 @@ Returns -1 if the plugin does not exist.
     after  => $alias_or_plugin_obj,
     alias  => $new_alias,
     plugin => $new_plugin_obj,
-    ## Optional:
+    # Optional:
     register_args => [ ],
   );
 
@@ -1242,7 +1272,7 @@ or plugin object. Returns boolean true on success.
     before => $alias_or_plugin_obj,
     alias  => $new_alias,
     plugin => $new_plugin_obj,
-    ## Optional:
+    # Optional:
     register_args => [ ],
   );
 
@@ -1292,8 +1322,13 @@ Arguments are the old plugin alias and object, respectively.
 
 =head2 Performance
 
-Dispatcher performance has been profiled and optimized, but I'm most 
-certainly open to ideas ;-)
+My motivation for writing this role was two-fold; I wanted
+L<Object::Pluggable> behavior but without screwing up my class inheritance,
+and I needed a little bit more juice out of the pipeline dispatch process for
+a fast-paced daemon.
+
+Dispatcher performance has been profiled and micro-optimized, but I'm most 
+certainly open to further ideas ;-)
 
 Some L<Benchmark> runs. 30000 L</_pluggable_process> calls with 20 loaded 
 plugins dispatching one argument to one handler that does nothing except 
