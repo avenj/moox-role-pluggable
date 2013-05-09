@@ -51,7 +51,12 @@ my $dispatcher_expected = {
     $self->process( 'not_handled' );
     $dispatcher_got->{'EAT_CLIENT was eaten'}++
       if $self->process( 'eat_client' ) == EAT_ALL;
-    $self->process( 'dies' );
+
+    { local *STDERR; my $err;
+        open *STDERR, '+<', \$err;
+        $self->process( 'dies' );
+        fail("Expected a warning") unless $err;
+    }
   }
 
   around '_pluggable_event' => sub {
@@ -72,7 +77,7 @@ my $dispatcher_expected = {
 
   sub P_dies {
     my ($self, undef) = splice @_, 0, 2;
-    Test::More::diag("This will throw warning noise:");
+#    Test::More::diag("This will throw warning noise:");
     die "Plugin event died!";
   }
 
