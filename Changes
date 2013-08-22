@@ -1,94 +1,86 @@
 # Changes for MooX::Role::Pluggable
 
-0.120004   (09 May 2013)
+0.120004 2013-05-09
 
-  Fix '_default' dispatch to plugins; event name was missing from args.
+  - Fix '_default' dispatch to plugins; event name was missing from args.
 
-  POD cleanups/clarifications. Could still use work.
+  - POD cleanups/clarifications. Could still use work.
 
-0.120003   (19 Apr 2013)
+0.120003 2013-04-19
 
-  Drop constant.pm
+  - Drop constant.pm
 
-0.120002   (07 Feb 2013)
+0.120002 2013-02-07
 
-  Missing dependency on Test::Exception
+  - Missing dependency on Test::Exception
 
-0.120001   (05 Feb 2013)
+0.120001 2013-02-05
 
-  Depend on newer Moo (fixes Moose compat)
-  Switch to Dist::Zilla
+  - Depend on newer Moo (fixes Moose compat)
+  
+  - Switch to Dist::Zilla
 
-
-0.11  29 Nov 2012
+0.11 2012-10-29
  
-   More optimizations & test tweaks.
+   - More optimizations & test tweaks.
+
+0.10 2012-10-29
+
+   - Squeeze a couple hundred more calls/sec out of dispatch by skipping
+     an unnecessary method call:
+        object-pluggable    6135/s
+        moox-role-pluggable 10239/s
+
+  - Documentation improvements.
+
+0.09 2012-10-28
+
+   - Fix args dispatched via plugin_error.
+     Include the object/src unconditionally.
+
+    - More dispatcher optimizations:
+         object-pluggable    6061/s
+         moox-role-pluggable 8174/s
+
+0.08 2012-10-28
+
+   - Fix _pluggable_init ev_prefix vs event_prefix
+     Documentation was incorrect, but no harm in accepting both.
+     (Same goes for reg_prefix vs register_prefix)
 
 
-0.10  29 Oct 2012
+0.07 2012-10-28
 
-   Squeeze a couple hundred more calls/sec out of dispatch by skipping
-   an unnecessary method call:
-     object-pluggable    6135/s
-     moox-role-pluggable 10239/s
-
-  Some documentation improvements.
-
-
-0.09  28 Oct 2012
-
-   Fix args dispatched via plugin_error.
-   Include the object/src unconditionally.
-
-   More dispatcher optimizations:
-     object-pluggable    6061/s
-     moox-role-pluggable 8174/s
-
-0.08  28 Oct 2012
-
-   Fix _pluggable_init ev_prefix vs event_prefix
-   Documentation was incorrect, but no harm in accepting both.
-   (Same goes for reg_prefix vs register_prefix)
-
-
-0.07  28 Oct 2012
-
-   Further dispatcher optimizations:
+   - Further dispatcher optimizations:
                            Rate
-     object-pluggable    6098/s
-     moox-role-pluggable 7009/s
+       object-pluggable    6098/s
+       moox-role-pluggable 7009/s
 
+0.06 2012-10-28
 
-0.06  28 Oct 2012
+   - Optimize dispatcher.
 
-   Optimize dispatcher.
+0.05 2012-10-28
 
+   - Fix plugin_error plugin object dispatch.
 
-0.05  28 Oct 2012
+0.04 2012-10-25
 
-   Fix plugin_error plugin object dispatch.
+   - Improved POD / tests
 
+0.03 2012-10-21
 
-0.04  25 Oct 2012
+   - When pipeline manipulation methods fail, carp() in addition to setting 
+     $@ and returning empty list (or similar).
 
-   Improved POD / tests
+   - Improved POD
 
+0.02 2012-10-20
 
-0.03  21 Oct 2012
+   - perl-5.10.1 should do, drop 5.12.1 dep
 
-   When pipeline manipulation methods fail, carp() in addition to setting 
-   $@ and returning empty list (or similar).
+   - Improved POD
 
-   Improved POD
+0.01 2012-10-19
 
-
-0.02  20 Oct 2012
-
-   perl-5.10.1 should do, drop 5.12.1 dep
-
-   Improved POD
-
-
-0.01  19 Oct 2012
-
-   Initial release
+   - Initial release
