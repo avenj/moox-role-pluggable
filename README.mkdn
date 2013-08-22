@@ -109,7 +109,7 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
     # Arguments are references and can be modified:
     my $arg = ${ $_[0] };
 
-    . . .
+    # ... do some work ...
 
       # Return an EAT constant to control event lifetime
       # EAT_NONE allows this event to continue through the pipeline

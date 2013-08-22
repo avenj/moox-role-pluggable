@@ -1,5 +1,11 @@
 # Changes for MooX::Role::Pluggable
 
+0.120005 2013-08-22
+
+  - Set '$@' in plugin_pipe_unshift
+
+  - Fix 'Changes' to conform to CPAN::Changes::Spec
+
 0.120004 2013-05-09
 
   - Fix '_default' dispatch to plugins; event name was missing from args.
