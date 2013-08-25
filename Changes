@@ -1,4 +1,8 @@
-# Changes for MooX::Role::Pluggable
+Revision history for Perl module MooX::Role::Pluggable
+
+0.120006 2013-08-25
+
+  - Drop minimum version to perl-5.8.9
 
 0.120005 2013-08-22
 
