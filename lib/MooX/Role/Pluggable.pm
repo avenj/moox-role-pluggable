@@ -1,7 +1,5 @@
 package MooX::Role::Pluggable;
 
-use 5.10.1;
-
 use Carp;
 use strictures 1;
 
@@ -56,28 +54,25 @@ sub _pluggable_init {
   my ($self, %params) = @_;
   $params{lc $_} = delete $params{$_} for keys %params;
 
-  my $reg_prefix = $params{register_prefix} // $params{reg_prefix};
+  my $reg_prefix = 
+    defined $params{register_prefix} ? $params{register_prefix}
+    : $params{reg_prefix};
   $self->__pluggable_opts->{reg_prefix} = $reg_prefix
     if defined $reg_prefix;
 
-  my $ev_prefix = $params{event_prefix} // $params{ev_prefix};
+  my $ev_prefix =
+    defined $params{event_prefix} ? $params{event_prefix}
+    : $params{ev_prefix};
   $self->__pluggable_opts->{ev_prefix} = $ev_prefix
     if defined $ev_prefix;
 
   if (defined $params{types}) {
-
-    if (ref $params{types} eq 'ARRAY') {
-      $self->__pluggable_opts->{types} = +{
-        map {;
-          $_ => $_
-        } @{ $params{types} }
-      };
-    } elsif (ref $params{types} eq 'HASH') {
-      $self->__pluggable_opts->{types} = $params{types}
-    } else {
-      confess "Expected types to be an ARRAY or HASH"
-    }
-
+    $self->__pluggable_opts->{types} = 
+      ref $params{types} eq 'ARRAY' ?
+        +{ map {; $_ => $_ } @{ $params{types} } }
+      : ref $params{types} eq 'HASH' ? 
+        $params{types}
+      : confess 'Expected ARRAY or HASH but got '.$params{types};
   }
 
   $self
@@ -351,7 +346,7 @@ sub subscribe {
   }
 
   my $handles
-    = $self->__pluggable_loaded->{HANDLE}->{$plugin}->{$type} //= {};
+    = $self->__pluggable_loaded->{HANDLE}->{$plugin}->{$type} ||= {};
 
   for my $ev (@events) {
     if (ref $ev eq 'ARRAY') {
