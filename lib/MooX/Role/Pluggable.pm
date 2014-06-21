@@ -70,24 +70,22 @@ sub _pluggable_init {
   my ($self, %params) = @_;
   $params{lc $_} = delete $params{$_} for keys %params;
 
-  my $reg_prefix = 
-    defined $params{register_prefix} ? $params{register_prefix}
-    : $params{reg_prefix};
+  my $reg_prefix = defined $params{register_prefix} ? 
+    $params{register_prefix} : $params{reg_prefix};
   $self->__pluggable_opts->{reg_prefix} = $reg_prefix
     if defined $reg_prefix;
 
-  my $ev_prefix =
-    defined $params{event_prefix} ? $params{event_prefix}
-    : $params{ev_prefix};
+  my $ev_prefix = defined $params{event_prefix} ? 
+    $params{event_prefix} : $params{ev_prefix};
   $self->__pluggable_opts->{ev_prefix} = $ev_prefix
     if defined $ev_prefix;
 
   if (defined $params{types}) {
     $self->__pluggable_opts->{types} = 
-      ref $params{types} eq 'ARRAY' ?
-        +{ map {; $_ => $_ } @{ $params{types} } }
+        ref $params{types} eq 'ARRAY' ?
+          +{ map {; $_ => $_ } @{ $params{types} } }
       : ref $params{types} eq 'HASH' ? 
-        $params{types}
+          $params{types}
       : confess 'Expected ARRAY or HASH but got '.$params{types};
   }
 
@@ -118,15 +116,13 @@ sub _pluggable_process {
   }
 
   my $prefix = $self->__pluggable_opts->{ev_prefix};
-  substr($event, 0, length($prefix), '')
-    if index($event, $prefix) == 0;
+  substr($event, 0, length($prefix), '') if index($event, $prefix) == 0;
 
   my $meth = $self->__pluggable_opts->{types}->{$type} .'_'. $event;
 
   my ($retval, $self_ret, @extra) = EAT_NONE;
 
   local $@;
-
   if      ( $self->can($meth) ) {
     # Dispatch to ourself
     eval {;
@@ -155,7 +151,7 @@ sub _pluggable_process {
   }
 
   if (@extra) {
-    push @$args, splice @extra, 0, scalar(@extra);
+    push @$args, splice @extra, 0, scalar(@extra)
   }
 
   my $handle_ref = $self->__pluggable_loaded->{HANDLE};
@@ -583,8 +579,8 @@ sub plugin_pipe_insert_after {
 
   return unless $self->__plug_pipe_register(
     $params{alias}, $params{plugin},
-    (
-      ref $params{register_args} eq 'ARRAY' ?
+    ( 
+      ref $params{register_args} eq 'ARRAY' ? 
         @{ $params{register_args} } : ()
     ),
   );
