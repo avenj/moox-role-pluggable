@@ -6,6 +6,8 @@ use strictures 1;
 use Scalar::Util 'blessed';
 use Try::Tiny;
 
+use Types::Standard -all;
+
 use MooX::Role::Pluggable::Constants;
 
 
@@ -13,8 +15,14 @@ use Moo::Role;
 
 
 has __pluggable_opts => (
-  is  => 'ro',
-  default => sub {
+  lazy        => 1,
+  is          => 'ro',
+  isa         => Dict[
+    reg_prefix => Str,
+    ev_prefix  => Str,
+    types      => HashRef,
+  ],
+  builder     => sub {
    +{
       reg_prefix => 'plugin_',
       ev_prefix  => 'plugin_ev_',
@@ -24,8 +32,14 @@ has __pluggable_opts => (
 );
 
 has __pluggable_loaded => (
-  is      => 'ro',
-  default => sub { 
+  lazy        => 1,
+  is          => 'ro',
+  isa         => Dict[
+    ALIAS   => HashRef, 
+    OBJ     => HashRef,
+    HANDLE  => HashRef,
+  ],
+  builder     => sub { 
    +{
       ALIAS  => +{},  # Objs keyed by aliases
       OBJ    => +{},  # Aliases keyed by obj
@@ -35,8 +49,10 @@ has __pluggable_loaded => (
 );
 
 has __pluggable_pipeline => (
-  is      => 'ro',
-  default => sub { [] },
+  lazy        => 1,
+  is          => 'ro',
+  isa         => ArrayRef,
+  builder     => sub { [] },
 );
 
 
