@@ -12,7 +12,7 @@ use MooX::Role::Pluggable::Constants;
 use Moo::Role;
 
 
-has '__pluggable_opts' => (
+has __pluggable_opts => (
   is  => 'ro',
   default => sub {
    +{
@@ -23,18 +23,18 @@ has '__pluggable_opts' => (
   },
 );
 
-has '__pluggable_loaded' => (
+has __pluggable_loaded => (
   is      => 'ro',
   default => sub { 
    +{
-      ALIAS  => {},  # Objs keyed by aliases
-      OBJ    => {},  # Aliases keyed by obj
-      HANDLE => {},  # Type/event map hashes keyed by obj
+      ALIAS  => +{},  # Objs keyed by aliases
+      OBJ    => +{},  # Aliases keyed by obj
+      HANDLE => +{},  # Type/event map hashes keyed by obj
     },
   },
 );
 
-has '__pluggable_pipeline' => (
+has __pluggable_pipeline => (
   is      => 'ro',
   default => sub { [] },
 );
@@ -329,31 +329,24 @@ sub plugin_replace {
 sub subscribe {
   my ($self, $plugin, $type, @events) = @_;
 
-  if (!grep { $_ eq $type } keys %{ $self->__pluggable_opts->{types} }) {
-    carp "Cannot subscribe; event type $type not supported";
-    return
-  }
+  confess "Cannot subscribe; event type $type not supported"
+    unless exists $self->__pluggable_opts->{types}->{$type};
 
-  unless (@events) {
-    carp
-      "Expected a plugin object, a type, and a list of events";
-    return
-  }
+  confess "Expected a plugin object, a type, and a list of events"
+    unless @events;
 
-  unless (blessed $plugin) {
-    carp "Expected a blessed plugin object";
-    return
-  }
+  confess "Expected a blessed plugin object" unless blessed $plugin;
 
   my $handles
-    = $self->__pluggable_loaded->{HANDLE}->{$plugin}->{$type} ||= {};
+      = $self->__pluggable_loaded->{HANDLE}->{$plugin}->{$type} 
+    ||= +{};
 
   for my $ev (@events) {
     if (ref $ev eq 'ARRAY') {
       $handles->{$_} = 1 for @$ev;
-    } else {
-      $handles->{$ev} = 1;
+      next
     }
+    $handles->{$ev} = 1
   }
 
   1
@@ -362,27 +355,19 @@ sub subscribe {
 sub unsubscribe {
   my ($self, $plugin, $type, @events) = @_;
 
-  if (!grep { $_ eq $type } keys %{ $self->__pluggable_opts->{types} }) {
-    carp "Cannot unsubscribe; event type $type not supported";
-    return
-  }
+  confess "Cannot unsubscribe; event type $type not supported"
+    unless exists $self->__pluggable_opts->{types}->{$type};
 
-  unless (blessed $plugin && defined $type) {
-    carp
-      "Expected a blessed plugin obj, event type, and events to unsubscribe";
-    return
-  }
+  confess "Expected a blessed plugin obj, event type, and events to unsubscribe"
+    unless blessed $plugin and defined $type;
 
-  unless (@events) {
-    carp "No events specified; did you mean to plugin_del instead?";
-    return
-  }
+  confess "No events specified; did you mean to plugin_del instead?"
+    unless @events;
 
-  my $handles
-    = $self->__pluggable_loaded->{HANDLE}->{$plugin}->{$type} || {};
+  my $handles = 
+    $self->__pluggable_loaded->{HANDLE}->{$plugin}->{$type} || +{};
 
   for my $ev (@events) {
-
     if (ref $ev eq 'ARRAY') {
       for my $this_ev (@$ev) {
         unless (delete $handles->{$this_ev}) {
@@ -873,7 +858,7 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
   package MyController;
   use Moo;
 
-  has 'dispatcher' => (
+  has dispatcher => (
     is      => 'rw',
     default => sub {  MyDispatcher->new()  },
   );
