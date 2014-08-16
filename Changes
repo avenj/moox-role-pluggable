@@ -1,5 +1,15 @@
 Revision history for Perl module MooX::Role::Pluggable
 
+1.001001 2014-08-16
+
+  - Fatals instead of warnings where they make more sense;
+    attempting to (un)subscribe to a nonexistant event type and passing bad
+    arguments to (un)subscribe should die rather than warn.
+
+  - Use Type::Tiny
+
+  - Happy CPAN Day!
+
 0.120006 2013-08-25
 
   - Drop minimum version to perl-5.8.9

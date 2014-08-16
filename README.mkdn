@@ -33,16 +33,16 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
     sub process {
       my ($self, $event, @args) = @_;
 
-    # Dispatch to 'P_' prefixed "PROCESS" type handlers.
-    #
-    # _pluggable_process will automatically strip a leading 'ev_prefix'
-    # (see the call to _pluggable_init above); that lets us easily
-    # dispatch errors to our P_plugin_error handler below without worrying
-    # about our ev_prefix ourselves:
-    my $retval = $self->_pluggable_process( PROCESS =>
-      $event,
-      \@args
-    );
+      # Dispatch to 'P_' prefixed "PROCESS" type handlers.
+      #
+      # _pluggable_process will automatically strip a leading 'ev_prefix'
+      # (see the call to _pluggable_init above); that lets us easily
+      # dispatch errors to our P_plugin_error handler below without worrying
+      # about our ev_prefix ourselves:
+      my $retval = $self->_pluggable_process( PROCESS =>
+        $event,
+        \@args
+      );
 
       unless ($retval == EAT_ALL) {
         # The pipeline allowed the event to continue.
@@ -61,17 +61,15 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
       # we could handle exceptions here and then eat them, perhaps:
       my ($self, undef) = splice @_, 0, 2;
 
-    # Arguments are references:
-    my $plug_err  = ${ $_[0] };
-    my $plug_obj  = ${ $_[1] };
-    my $error_src = ${ $_[2] };
+      # Arguments are references:
+      my $plug_err  = ${ $_[0] };
+      my $plug_obj  = ${ $_[1] };
+      my $error_src = ${ $_[2] };
 
-    # ...
-    
-
+      # ...
+      
       EAT_ALL
     }
-
 
 
     # A Plugin object.
@@ -84,13 +82,13 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
     sub Plug_register {
       my ($self, $core) = @_;
 
-    # Subscribe to events:
-    $core->subscribe( $self, 'PROCESS',
-      'my_event', 
-      'another_event'
-    );
+      # Subscribe to events:
+      $core->subscribe( $self, 'PROCESS',
+        'my_event', 
+        'another_event'
+      );
 
-    # Log that we're here, do some initialization, etc ...
+      # Log that we're here, do some initialization, etc ...
 
       return EAT_NONE
     }
@@ -106,10 +104,10 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
       # Handle a dispatched "PROCESS"-type event:
       my ($self, $core) = splice @_, 0, 2;
 
-    # Arguments are references and can be modified:
-    my $arg = ${ $_[0] };
+      # Arguments are references and can be modified:
+      my $arg = ${ $_[0] };
 
-    # ... do some work ...
+      # ... do some work ...
 
       # Return an EAT constant to control event lifetime
       # EAT_NONE allows this event to continue through the pipeline
@@ -123,7 +121,7 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
     package MyController;
     use Moo;
 
-    has 'dispatcher' => (
+    has dispatcher => (
       is      => 'rw',
       default => sub {  MyDispatcher->new()  },
     );
@@ -142,21 +140,21 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
 
 # DESCRIPTION
 
-A [Moo::Role](http://search.cpan.org/perldoc?Moo::Role) for turning instances of your class into pluggable objects.
+A [Moo::Role](https://metacpan.org/pod/Moo::Role) for turning instances of your class into pluggable objects.
 Consumers of this role gain a plugin pipeline and methods to manipulate it,
-as well as a flexible dispatch system (see ["\_pluggable\_process"](#\_pluggable\_process)).
+as well as a flexible dispatch system (see ["\_pluggable\_process"](#_pluggable_process)).
 
-The logic and behavior is based almost entirely on [Object::Pluggable](http://search.cpan.org/perldoc?Object::Pluggable) 
-(see ["AUTHOR"](#AUTHOR)). 
+The logic and behavior is based almost entirely on [Object::Pluggable](https://metacpan.org/pod/Object::Pluggable) 
+(see ["AUTHOR"](#author)). 
 Some methods are the same; implementation & interface differ and you 
-will still want to read thoroughly if coming from [Object::Pluggable](http://search.cpan.org/perldoc?Object::Pluggable). 
-Dispatch is significantly faster -- see ["Performance"](#Performance).
+will still want to read thoroughly if coming from [Object::Pluggable](https://metacpan.org/pod/Object::Pluggable). 
+Dispatch is significantly faster -- see ["Performance"](#performance).
 
 It may be worth noting that this is nothing at all like the Moose 
-counterpart [MooseX::Role::Pluggable](http://search.cpan.org/perldoc?MooseX::Role::Pluggable). If the names confuse ... well, I 
+counterpart [MooseX::Role::Pluggable](https://metacpan.org/pod/MooseX::Role::Pluggable). If the names confuse ... well, I 
 lacked for better ideas. ;-)
 
-If you're using [POE](http://search.cpan.org/perldoc?POE), also see [MooX::Role::POE::Emitter](http://search.cpan.org/perldoc?MooX::Role::POE::Emitter), which consumes
+If you're using [POE](https://metacpan.org/pod/POE), also see [MooX::Role::POE::Emitter](https://metacpan.org/pod/MooX::Role::POE::Emitter), which consumes
 this role.
 
 ## Initialization
@@ -168,10 +166,10 @@ this role.
       # Defaults to 'plugin_' ('plugin_register' / 'plugin_unregister')
       reg_prefix   => 'plugin_',
 
-    # Prefix for dispatched internal events
-    #  (add, del, error, register, unregister ...)
-    # Defaults to 'plugin_ev_'
-    event_prefix => 'plugin_ev_',
+      # Prefix for dispatched internal events
+      #  (add, del, error, register, unregister ...)
+      # Defaults to 'plugin_ev_'
+      event_prefix => 'plugin_ev_',
 
       # Map type names to prefixes.
       # Event types are arbitrary.
@@ -183,12 +181,12 @@ this role.
       },
     );
 
-A consumer can call __\_pluggable\_init__ to set up pipeline-related options 
+A consumer can call **\_pluggable\_init** to set up pipeline-related options 
 appropriately; this should be done prior to loading plugins or dispatching 
-to ["\_pluggable\_process"](#\_pluggable\_process). If it is not called, the defaults 
+to ["\_pluggable\_process"](#_pluggable_process). If it is not called, the defaults 
 (as shown above) are used.
 
-__types =>__ can be either an ARRAY of event types (which will be used 
+**types =>** can be either an ARRAY of event types (which will be used 
 as prefixes):
 
     types => [ qw/ IncomingEvent OutgoingEvent / ],
@@ -201,7 +199,7 @@ as prefixes):
     },
 
 A '\_' is automatically appended to event type prefixes when events are 
-dispatched via ["\_pluggable\_process"](#\_pluggable\_process); thus, an event destined for our
+dispatched via ["\_pluggable\_process"](#_pluggable_process); thus, an event destined for our
 'Incoming' type shown above will be dispatched to appropriate `I_` handlers:
 
     # Dispatched to 'I_foo' method in plugins registered for Incoming 'foo':
@@ -226,78 +224,78 @@ Shuts down the plugin pipeline, unregistering/unloading all known plugins.
     }
 
 `_pluggable_event` is called for internal notifications, such as plugin 
-load/unload and error reporting (see ["Internal events"](#Internal events)).
+load/unload and error reporting (see ["Internal events"](#internal-events)).
 
 It should be overriden in your consuming class to do something useful with 
 the dispatched event (and any other arguments passed in).
 
-The `$event` passed will be prefixed with the configured __event\_prefix__.
+The `$event` passed will be prefixed with the configured **event\_prefix**.
 
-Also see ["Internal events"](#Internal events).
+Also see ["Internal events"](#internal-events).
 
 ## Registration
 
 A plugin is any blessed object that is registered with your Pluggable object
-via ["plugin\_add"](#plugin\_add); during registration, plugins usually subscribe to some
+via ["plugin\_add"](#plugin_add); during registration, plugins usually subscribe to some
 events via ["subscribe"](#subscribe).
 
-See ["plugin\_add"](#plugin\_add) regarding loading plugins.
+See ["plugin\_add"](#plugin_add) regarding loading plugins.
 
 ### subscribe
 
-__Subscribe a plugin to some pluggable events.__
+**Subscribe a plugin to some pluggable events.**
 
     $self->subscribe( $plugin_obj, $type, @events );
 
 Registers a plugin object to receive `@events` of type `$type`.
 
 This is frequently called from within the plugin's registration handler 
-(see ["plugin\_register"](#plugin\_register)):
+(see ["plugin\_register"](#plugin_register)):
 
     # In a plugin:
     sub plugin_register {
       my ($self, $core) = @_;
 
-    $core->subscribe( $self, PROCESS =>
-      qw/
-        my_event
-        another_event
-      /
-    );
+      $core->subscribe( $self, PROCESS =>
+        qw/
+          my_event
+          another_event
+        /
+      );
 
-    $core->subscribe( $self, NOTIFY => 
-      'all' 
-    );
+      $core->subscribe( $self, NOTIFY => 
+        'all' 
+      );
 
       EAT_NONE
     }
 
-Subscribe to __all__ to receive all events. (It may be worth noting that 
+Subscribe to **all** to receive all events. (It may be worth noting that 
 subscribing a lot of plugins to 'all' events will 
-cause a performance hit in ["\_pluggable\_process"](#\_pluggable\_process) dispatch versus 
+cause a performance hit in ["\_pluggable\_process"](#_pluggable_process) dispatch versus 
 subscribing to specific events.)
 
 ### unsubscribe
 
-__Unsubscribe a plugin from subscribed events.__
+**Unsubscribe a plugin from subscribed events.**
 
 The unregister counterpart to ["subscribe"](#subscribe); stops delivering
 specified events to a plugin.
 
-The plugin is still loaded and registered until ["plugin\_del"](#plugin\_del) is called.
+The plugin is still loaded and registered until ["plugin\_del"](#plugin_del) is called.
 
 Carries the same arguments as ["subscribe"](#subscribe).
 
 ### plugin\_register
 
-__Defined in your plugin(s) and called at load time.__
+**Defined in your plugin(s) and called at load time.**
 
 (Note that 'plugin\_' is just a default register method prefix; it can be 
-changed prior to loading plugins. See ["\_pluggable\_init"](#\_pluggable\_init) for details.)
+changed prior to loading plugins. See ["\_pluggable\_init"](#_pluggable_init) for details.)
 
 The `plugin_register` method is called on a loaded plugin when it is 
 added to the pipeline; it is passed the plugin object (`$self`), the 
-Pluggable object, and any arguments given to ["plugin\_add"](#plugin\_add) (or similar 
+Pluggable object, and any arguments given to ["plugin\_add"](#plugin_add) (or similar 
 registration methods).
 
 Normally one might call a ["subscribe"](#subscribe) from here to start receiving 
@@ -311,14 +309,14 @@ events after load-time:
 
 ### plugin\_unregister
 
-__Defined in your plugin(s) and called at load time.__
+**Defined in your plugin(s) and called at load time.**
 
 (Note that 'plugin\_' is just a default register method prefix; it can be 
-changed prior to loading plugins. See ["\_pluggable\_init"](#\_pluggable\_init) for details.)
+changed prior to loading plugins. See ["\_pluggable\_init"](#_pluggable_init) for details.)
 
-The unregister counterpart to ["plugin\_register"](#plugin\_register), called when the object 
-is removed from the pipeline (via ["plugin\_del"](#plugin\_del) or 
-["\_pluggable\_destroy"](#\_pluggable\_destroy)).
+The unregister counterpart to ["plugin\_register"](#plugin_register), called when the object 
+is removed from the pipeline (via ["plugin\_del"](#plugin_del) or 
+["\_pluggable\_destroy"](#_pluggable_destroy)).
 
     sub plugin_unregister {
       my ($self, $core) = @_;
@@ -336,7 +334,7 @@ Carries the same arguments.
 
 The `_pluggable_process` method handles dispatching.
 
-If `$event` is prefixed with our event prefix (see ["\_pluggable\_init"](#\_pluggable\_init)),
+If `$event` is prefixed with our event prefix (see ["\_pluggable\_init"](#_pluggable_init)),
 the prefix is stripped prior to dispatch (to be replaced with a type 
 prefix matching the specified `$type`).
 
@@ -368,12 +366,12 @@ Dispatch process for `$event` 'foo' of `$type` 'NOTIFY':
     - If the event was not eaten (see below), dispatch to plugins
 
 "Eaten" means a handler returned a EAT\_\* constant from 
-[MooX::Role::Pluggable::Constants](http://search.cpan.org/perldoc?MooX::Role::Pluggable::Constants) indicating that the event's lifetime 
+[MooX::Role::Pluggable::Constants](https://metacpan.org/pod/MooX::Role::Pluggable::Constants) indicating that the event's lifetime 
 should terminate.
 
 Specifically:
 
-__If our consuming class provides a method or '\_default' that returns:__
+**If our consuming class provides a method or '\_default' that returns:**
 
     EAT_ALL:    skip plugin pipeline, return EAT_ALL
     EAT_CLIENT: continue to plugin pipeline
@@ -382,7 +380,7 @@ __If our consuming class provides a method or '\_default' that returns:__
                 return EAT_NONE unless EAT_CLIENT was seen previously
     EAT_NONE:   continue to plugin pipeline
 
-__If one of our plugins in the pipeline returns:__
+**If one of our plugins in the pipeline returns:**
 
     EAT_ALL:    skip further plugins, return EAT_ALL
     EAT_CLIENT: continue to next plugin, set pending EAT_ALL
@@ -391,7 +389,7 @@ __If one of our plugins in the pipeline returns:__
                 else return EAT_NONE
     EAT_NONE:   continue to next plugin
 
-This functionality (derived from [Object::Pluggable](http://search.cpan.org/perldoc?Object::Pluggable)) provides 
+This functionality (derived from [Object::Pluggable](https://metacpan.org/pod/Object::Pluggable)) provides 
 fine-grained control over event lifetime.
 
 Higher layers can check for an `EAT_ALL` return value from 
@@ -405,7 +403,7 @@ to indicate that the event should not be dispatched further.
 ## Plugin Management Methods
 
 Plugin pipeline manipulation methods will set `$@`, `carp()`, and return 
-empty list on error (unless otherwise noted). See ["plugin\_error"](#plugin\_error) 
+empty list on error (unless otherwise noted). See ["plugin\_error"](#plugin_error) 
 regarding errors raised during plugin registration and dispatch.
 
 ### plugin\_add
@@ -413,7 +411,7 @@ regarding errors raised during plugin registration and dispatch.
     $self->plugin_add( $alias, $plugin_obj, @args );
 
 Add a plugin object to the pipeline. Returns the same values as 
-["plugin\_pipe\_push"](#plugin\_pipe\_push).
+["plugin\_pipe\_push"](#plugin_pipe_push).
 
 ### plugin\_del
 
@@ -426,7 +424,7 @@ Takes either a plugin alias or object. Returns the removed plugin object.
 ### plugin\_get
 
     my $plug_obj = $self->plugin_get( $alias );
-	my ($plug_obj, $plug_alias) = $self->plugin_get( $alias_or_plugin_obj );
+          my ($plug_obj, $plug_alias) = $self->plugin_get( $alias_or_plugin_obj );
 
 In scalar context, returns the plugin object belonging to the specified 
 alias.
@@ -461,14 +459,14 @@ Returns the old (removed) plugin object.
     $self->plugin_pipe_push( $alias, $plugin_obj, @args );
 
 Add a plugin to the end of the pipeline. (Typically one would use 
-["plugin\_add"](#plugin\_add) rather than calling this method directly.)
+["plugin\_add"](#plugin_add) rather than calling this method directly.)
 
 ### plugin\_pipe\_pop
 
     my $plug = $self->plugin_pipe_pop( @unregister_args );
 
 Pop the last plugin off the pipeline, passing any specified arguments to 
-["plugin\_unregister"](#plugin\_unregister).
+["plugin\_unregister"](#plugin_unregister).
 
 In scalar context, returns the plugin object that was removed.
 
@@ -487,7 +485,7 @@ Returns the total number of loaded plugins (or an empty list on failure).
     $self->plugin_pipe_shift( @unregister_args );
 
 Shift the first plugin off the pipeline, passing any specified args to 
-["plugin\_unregister"](#plugin\_unregister).
+["plugin\_unregister"](#plugin_unregister).
 
 In scalar context, returns the plugin object that was removed.
 
@@ -527,7 +525,7 @@ or plugin object. Returns boolean true on success.
       register_args => [ ],
     );
 
-Similar to ["plugin\_pipe\_insert\_after"](#plugin\_pipe\_insert\_after), but insert before the specified 
+Similar to ["plugin\_pipe\_insert\_after"](#plugin_pipe_insert_after), but insert before the specified 
 previously-existing plugin, not after.
 
 ### plugin\_pipe\_bump\_up
@@ -548,12 +546,12 @@ Returns -1 if the plugin cannot be bumped down any farther.
 
 ## Internal events
 
-These events are dispatched to ["\_pluggable\_event"](#\_pluggable\_event) prefixed with our 
-pluggable event prefix; see ["\_pluggable\_init"](#\_pluggable\_init).
+These events are dispatched to ["\_pluggable\_event"](#_pluggable_event) prefixed with our 
+pluggable event prefix; see ["\_pluggable\_init"](#_pluggable_init).
 
 ### plugin\_error
 
-Issued via ["\_pluggable\_event"](#\_pluggable\_event) when an error occurs.
+Issued via ["\_pluggable\_event"](#_pluggable_event) when an error occurs.
 
 The arguments are, respectively: the error string, the offending object, 
 and a string describing the offending object ('self' or 'plugin' with name 
@@ -561,27 +559,27 @@ appended).
 
 ### plugin\_added
 
-Issued via ["\_pluggable\_event"](#\_pluggable\_event) when a new plugin is registered.
+Issued via ["\_pluggable\_event"](#_pluggable_event) when a new plugin is registered.
 
 Arguments are the new plugin alias and object, respectively.
 
 ### plugin\_removed
 
-Issued via ["\_pluggable\_event"](#\_pluggable\_event) when a plugin is unregistered.
+Issued via ["\_pluggable\_event"](#_pluggable_event) when a plugin is unregistered.
 
 Arguments are the old plugin alias and object, respectively.
 
 ## Performance
 
 My motivation for writing this role was two-fold; I wanted
-[Object::Pluggable](http://search.cpan.org/perldoc?Object::Pluggable) behavior but without screwing up my class inheritance,
+[Object::Pluggable](https://metacpan.org/pod/Object::Pluggable) behavior but without screwing up my class inheritance,
 and I needed a little bit more juice out of the pipeline dispatch process for
 a fast-paced daemon.
 
 Dispatcher performance has been profiled and micro-optimized, but I'm most 
 certainly open to further ideas ;-)
 
-Some [Benchmark](http://search.cpan.org/perldoc?Benchmark) runs. 30000 ["\_pluggable\_process"](#\_pluggable\_process) calls with 20 loaded 
+Some [Benchmark](https://metacpan.org/pod/Benchmark) runs. 30000 ["\_pluggable\_process"](#_pluggable_process) calls with 20 loaded 
 plugins dispatching one argument to one handler that does nothing except 
 return EAT\_NONE:
 
@@ -605,4 +603,4 @@ repository; see [https://github.com/avenj/moox-role-pluggable](https://github.co
 Jon Portnoy <avenj@cobaltirc.org>
 
 Written from the ground up, but conceptually based entirely on 
-[Object::Pluggable](http://search.cpan.org/perldoc?Object::Pluggable) by BINGOS, HINRIK, APOCAL, japhy et al.
+[Object::Pluggable](https://metacpan.org/pod/Object::Pluggable) by BINGOS, HINRIK, APOCAL, japhy et al.
