@@ -1,7 +1,7 @@
 package MooX::Role::Pluggable;
 
 use Carp;
-use strictures 1;
+use strictures 2;
 
 use Scalar::Util 'blessed';
 use Try::Tiny;

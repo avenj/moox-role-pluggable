@@ -1,5 +1,5 @@
 package MooX::Role::Pluggable::Constants;
-use strictures 1;
+use strictures 2;
 
 sub EAT_NONE   () { 1 }
 sub EAT_CLIENT () { 2 }
