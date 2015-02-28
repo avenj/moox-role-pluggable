@@ -1,5 +1,9 @@
 Revision history for Perl module MooX::Role::Pluggable
 
+1.001002 2015-02-28
+
+  - 'use strictures 2;' for saner fatal warning behavior
+
 1.001001 2014-08-16
 
   - Fatals instead of warnings where they make more sense;
