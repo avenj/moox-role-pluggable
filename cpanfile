@@ -6,8 +6,7 @@ requires "Scalar::Util" => "0";
 
 requires "strictures"   => "2";
 
-requires "Moo"          => "1.004";
-requires "MooX::late"   => "0.014";
+requires "Moo"          => "1.006";
 requires "Type::Tiny"   => "1";
 
 requires "Try::Tiny"    => "0";
