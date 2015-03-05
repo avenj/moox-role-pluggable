@@ -259,7 +259,8 @@ sub plugin_add {
 
 sub plugin_alias_list {
   my ($self) = @_;
-  keys %{ $self->__pluggable_loaded->{ALIAS} }
+  map {; $self->__pluggable_loaded->{OBJ}->{$_} }
+    @{ $self->__pluggable_pipeline }
 }
 
 sub plugin_del {
@@ -1210,7 +1211,10 @@ In list context, returns the object and alias, respectively.
 
   my @loaded = $self->plugin_alias_list;
 
-Returns the (unordered) list of loaded plugin aliases.
+Returns the list of loaded plugin aliases.
+
+As of version C<1.002>, the list is ordered to match actual plugin dispatch
+order. In prior versions, the list is unordered.
 
 =head3 plugin_replace
 

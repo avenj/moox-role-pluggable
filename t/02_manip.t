@@ -269,7 +269,10 @@ $disp->do_test_events;
 }
 
 ## plugin_alias_list()
-cmp_ok( $disp->plugin_alias_list, '==', 2, 'plugin_alias_list has 2 plugs' );
+## (should be ordered)
+my @listed = $disp->plugin_alias_list;
+is_deeply \@listed, [ 'MyPlugA', 'MyPlugB' ],
+  'plugin_alias_list ok';
 
 ## plugin_pipe_bump_up()
 $disp->plugin_pipe_bump_up( 'MyPlugB', 1 );
