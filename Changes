@@ -1,5 +1,16 @@
 Revision history for Perl module MooX::Role::Pluggable
 
+1.002001 2015-03-05
+
+  - plugin_alias_list now returns properly ordered list; suggested by caipre
+
+  - POD; merge edits from caipre + other cleanups and fixes;
+    https://github.com/avenj/moox-role-pluggable/issues/1
+
+  - Drop Test::Exception, MooX::late dependencies
+
+  - Packaging; switch to cpanfile
+
 1.001002 2015-02-28
 
   - 'use strictures 2;' for saner fatal warning behavior
