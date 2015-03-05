@@ -756,8 +756,8 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
 
   # A simple pluggable dispatcher:
   package MyDispatcher;
-  use Moo;
   use MooX::Role::Pluggable::Constants;
+  use Moo;
   with 'MooX::Role::Pluggable';
 
   sub BUILD {
