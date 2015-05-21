@@ -750,7 +750,7 @@ unless caller;
 
 =head1 NAME
 
-MooX::Role::Pluggable - Add a plugin pipeline to your cows
+MooX::Role::Pluggable - A plugin pipeline for your Moo-based class
 
 =head1 SYNOPSIS
 
@@ -968,13 +968,14 @@ Shuts down the plugin pipeline, unregistering/unloading all known plugins.
   }
 
 C<_pluggable_event> is called for internal notifications, such as plugin
-load/unload and error reporting (see L</Internal Events>) -- it should be
+load/unload and error reporting (see L</Internal Events>) -- it can be
 overriden in your consuming class to do something useful with the dispatched
 event and any arguments passed.
 
 The C<$event> given will be prefixed with the configured B<event_prefix>.
 
-Also see L</Internal Events>.
+(It's not strictly necessary to implement a C<_pluggable_event> handler; errors
+will also C<warn>.)
 
 =head2 Registration
 
