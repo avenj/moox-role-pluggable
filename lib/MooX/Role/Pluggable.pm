@@ -111,9 +111,8 @@ sub _pluggable_process {
   #   - Conditionals have been optimized a bit.
   #
   # I'm open to other ideas . . .
-  unless (ref $args) {
-    confess 'Expected a type, event, and (possibly empty) args ARRAY'
-  }
+  confess 'Expected a type, event, and (possibly empty) args ARRAY'
+    unless ref $args;
 
   my $prefix = $self->__pluggable_opts->{ev_prefix};
   substr($event, 0, length($prefix), '') if index($event, $prefix) == 0;
@@ -121,19 +120,14 @@ sub _pluggable_process {
   my $meth = $self->__pluggable_opts->{types}->{$type} .'_'. $event;
 
   my ($retval, $self_ret, @extra) = EAT_NONE;
-
   local $@;
   if      ( $self->can($meth) ) {
     # Dispatch to ourself
-    eval {;
-      $self_ret = $self->$meth($self, \(@$args), \@extra)
-    };
+    eval {; $self_ret = $self->$meth($self, \(@$args), \@extra) };
     __plugin_process_chk($self, $self, $meth, $self_ret);
   } elsif ( $self->can('_default') ) {
     # Dispatch to _default
-    eval {;
-      $self_ret = $self->_default($self, $meth, \(@$args), \@extra)
-    };
+    eval {; $self_ret = $self->_default($self, $meth, \(@$args), \@extra) };
     __plugin_process_chk($self, $self, '_default', $self_ret);
   }
 
@@ -150,9 +144,7 @@ sub _pluggable_process {
     return EAT_ALL
   }
 
-  if (@extra) {
-    push @$args, splice @extra, 0, scalar(@extra)
-  }
+  push @$args, splice @extra, 0, scalar(@extra) if @extra;
 
   my $handle_ref = $self->__pluggable_loaded->{HANDLE};
   my $plug_ret;
