@@ -870,9 +870,7 @@ MooX::Role::Pluggable - A plugin pipeline for your Moo-based class
 
   sub BUILD {
     my ($self) = @_;
-    $self->dispatcher->plugin_add( 'MyPlugin',
-      MyPlugin->new()
-    );
+    $self->dispatcher->plugin_add( 'MyPlugin', MyPlugin->new );
   }
 
   sub do_stuff {
