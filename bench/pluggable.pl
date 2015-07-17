@@ -107,9 +107,6 @@ $mx_disp->plugin_add( 'Null'.$_ => Plug::NoEvents->new )
      for 1 .. $pcount;
 use feature 'say';
 say "$count runs for $pcount x2 plugins";
-say "Object::Pluggable ".$Object::Pluggable::VERSION;
-say "MooX::Role::Pluggable ".$MooX::Role::Pluggable::VERSION;
-
 
 my %stuff = ( $count, +{
   'object-pluggable' => sub {
