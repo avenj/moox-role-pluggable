@@ -1,6 +1,6 @@
 # NAME
 
-MooX::Role::Pluggable - Add a plugin pipeline to your cows
+MooX::Role::Pluggable - A plugin pipeline for your Moo-based class
 
 # SYNOPSIS
 
@@ -128,9 +128,7 @@ MooX::Role::Pluggable - Add a plugin pipeline to your cows
 
     sub BUILD {
       my ($self) = @_;
-      $self->dispatcher->plugin_add( 'MyPlugin',
-        MyPlugin->new()
-      );
+      $self->dispatcher->plugin_add( 'MyPlugin', MyPlugin->new );
     }
 
     sub do_stuff {
@@ -218,13 +216,14 @@ Shuts down the plugin pipeline, unregistering/unloading all known plugins.
     }
 
 `_pluggable_event` is called for internal notifications, such as plugin
-load/unload and error reporting (see ["Internal Events"](#internal-events)) -- it should be
+load/unload and error reporting (see ["Internal Events"](#internal-events)) -- it can be
 overriden in your consuming class to do something useful with the dispatched
 event and any arguments passed.
 
 The `$event` given will be prefixed with the configured **event\_prefix**.
 
-Also see ["Internal Events"](#internal-events).
+(It's not strictly necessary to implement a `_pluggable_event` handler; errors
+will also `warn`.)
 
 ## Registration
 

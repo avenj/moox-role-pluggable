@@ -1,5 +1,9 @@
 Revision history for Perl module MooX::Role::Pluggable
 
+1.002002 2015-07-17
+
+  - Minor optimizations
+
 1.002001 2015-03-05
 
   - plugin_alias_list now returns properly ordered list; suggested by caipre
