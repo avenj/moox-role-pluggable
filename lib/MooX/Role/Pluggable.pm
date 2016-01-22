@@ -1231,6 +1231,8 @@ Returns the old (removed) plugin object.
 Add a plugin to the end of the pipeline; typically one would call
 L</plugin_add> rather than using this method directly.
 
+Returns the total number of plugins in the pipeline.
+
 =head3 plugin_pipe_pop
 
   my $plug = $self->plugin_pipe_pop( @unregister_args );
