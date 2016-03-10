@@ -755,10 +755,13 @@ MooX::Role::Pluggable - A plugin pipeline for your Moo-based class
   sub BUILD {
     my ($self) = @_;
 
-    # (optionally) Configure our plugin pipeline
+    # (optionally) Configure our plugin pipeline (see "Initialization"):
     $self->_pluggable_init(
+      # Event prefix for register/unregister events:
       reg_prefix => 'Plug_',
+      # Event prefix for internal events (see "Internal Events"):
       ev_prefix  => 'Event_',
+      # Pluggable event types and prefixes:
       types      => {
         NOTIFY  => 'N',
         PROCESS => 'P',
