@@ -1005,9 +1005,10 @@ L</plugin_register>):
     EAT_NONE
   }
 
-Subscribe to B<all> to receive all events -- but note that subscribing many
-plugins to 'all' events is less performant during calls to
-L</_pluggable_process> than many subscriptions to specific events.
+Subscribe to C<all> to receive all events -- but note that subscribing plugins
+to 'all' events is less performant during calls to L</_pluggable_process> than
+many subscriptions to specific events (especially if there are a significant
+number of plugins loaded).
 
 =head3 unsubscribe
 
